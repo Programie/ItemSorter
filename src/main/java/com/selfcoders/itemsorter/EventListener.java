@@ -77,8 +77,6 @@ public class EventListener implements Listener {
 
         Container containerBlock = (Container) attachedToBlockState;
         Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> updateInventory(containerBlock.getInventory()), 1L);
-
-        player.sendMessage(ChatColor.GREEN + "Sign correctly placed.");
     }
 
     @EventHandler
