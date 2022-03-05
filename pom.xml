@@ -14,7 +14,7 @@
     <packaging>jar</packaging>
 
     <name>ItemSorter</name>
-    <description>A Minecraft Bukkit plugin to sort items inventories like chests into other inventories</description>
+    <description>A Minecraft Bukkit plugin which transfers and sorts items from inventories like chests into other inventories</description>
     <url>https://gitlab.com/Programie/ItemSorter</url>
 
     <scm>
