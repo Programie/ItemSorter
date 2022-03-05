@@ -1,0 +1,3 @@
+include:
+  - project: "Programie/Common"
+    file: "bukkit-plugins/gitlab-ci.yml"
