@@ -40,7 +40,8 @@ public class EventListener implements Listener {
 
         WallSign sign = (WallSign) blockData;
         Block attachedToBlock = block.getRelative(sign.getFacing().getOppositeFace());
-        if (!(attachedToBlock.getState() instanceof Container)) {
+        BlockState attachedToBlockState = attachedToBlock.getState();
+        if (!(attachedToBlockState instanceof Container)) {
             player.sendMessage(ChatColor.RED + "An ItemSorter sign must be attached to an inventory block (i.e. chest or hopper)!");
             block.breakNaturally();
             return;
@@ -73,6 +74,9 @@ public class EventListener implements Listener {
         }
 
         plugin.saveConfig();
+
+        Container containerBlock = (Container) attachedToBlockState;
+        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> updateInventory(containerBlock.getInventory()), 1L);
 
         player.sendMessage(ChatColor.GREEN + "Sign correctly placed.");
     }
