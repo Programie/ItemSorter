@@ -93,19 +93,38 @@ public class SignHelper {
         return signBlock.getRelative(sign.getFacing().getOppositeFace());
     }
 
-    static SignData getSignDataForInventory(Inventory inventory) {
-        InventoryHolder inventoryHolder = inventory.getHolder();
-        if (!(inventoryHolder instanceof Container)) {
-            return null;
-        }
-
-        Block block = ((Container) inventoryHolder).getBlock();
-
-        Sign sign = SignHelper.getSignAttachedToBlock(block);
+    static SignData getSignDataForContainer(Container container) {
+        Sign sign = SignHelper.getSignAttachedToBlock(container.getBlock());
         if (sign == null) {
             return null;
         }
 
         return new SignData(sign);
+    }
+
+    static SignData getSignDataForInventory(Inventory inventory) {
+        InventoryHolder inventoryHolder = inventory.getHolder();
+
+        if (inventoryHolder instanceof Container) {
+            return getSignDataForContainer((Container) inventoryHolder);
+        }
+
+        // Double chests are a bit special...
+        if (inventoryHolder instanceof DoubleChest) {
+            InventoryHolder leftSide = ((DoubleChest) inventoryHolder).getLeftSide();
+            if (leftSide instanceof Container) {
+                SignData signData = getSignDataForContainer((Container) leftSide);
+                if (signData != null) {
+                    return signData;
+                }
+            }
+
+            InventoryHolder rightSide = ((DoubleChest) inventoryHolder).getRightSide();
+            if (rightSide instanceof Container) {
+                return getSignDataForContainer((Container) rightSide);
+            }
+        }
+
+        return null;
     }
 }
