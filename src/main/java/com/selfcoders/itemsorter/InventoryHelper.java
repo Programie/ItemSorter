@@ -80,8 +80,9 @@ public class InventoryHelper {
     }
 
     static void moveStackToInventories(ItemStack itemStack, Inventory sourceInventory, List<Inventory> targetInventories) {
-        Material type = itemStack.getType();
         int movedItems = 0;
+
+        ItemStack removeStack = itemStack.clone();
 
         for (Inventory targetInventory : targetInventories) {
             int amount = itemStack.getAmount();
@@ -102,7 +103,7 @@ public class InventoryHelper {
         }
 
         if (movedItems > 0) {
-            ItemStack removeStack = new ItemStack(type, movedItems);
+            removeStack.setAmount(movedItems);
             sourceInventory.removeItem(removeStack);
         }
     }
