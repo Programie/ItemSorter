@@ -66,10 +66,10 @@ public class EventListener implements Listener {
 
         switch (signData.type.toLowerCase()) {
             case ItemLink.TYPE_SOURCE:
-                itemLink.addSource(block.getLocation());
+                itemLink.addSource(block.getLocation(), signData.order);
                 break;
             case ItemLink.TYPE_TARGET:
-                itemLink.addTarget(block.getLocation());
+                itemLink.addTarget(block.getLocation(), signData.order);
                 break;
         }
 

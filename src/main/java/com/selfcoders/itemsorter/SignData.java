@@ -7,6 +7,7 @@ public class SignData {
     String tagLine;
     String type;
     String name;
+    Integer order = 0;
 
     SignData(String[] lines) {
         if (lines.length >= 1) {
@@ -19,6 +20,28 @@ public class SignData {
 
         if (lines.length >= 3) {
             name = ChatColor.stripColor(lines[2]);
+        }
+
+        if (lines.length >= 4) {
+            String[] options = ChatColor.stripColor(lines[3]).split(",");
+
+            for (String option : options) {
+                String[] optionPairs = option.split(":", 2);
+                String value = "";
+                if (optionPairs.length == 2) {
+                    value = optionPairs[1];
+                }
+
+                switch (optionPairs[0]) {
+                    case "o":// Order
+                        try {
+                            order = Integer.valueOf(value);
+                        } catch (Exception exception) {
+                            // ignore
+                        }
+                        break;
+                }
+            }
         }
     }
 

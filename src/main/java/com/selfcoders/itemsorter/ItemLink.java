@@ -4,10 +4,7 @@ import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ItemLink {
     static final String TYPE_SOURCE = "source";
@@ -44,7 +41,7 @@ public class ItemLink {
         }
     }
 
-    private void addLocation(String type, Location location) {
+    private void addLocation(String type, Location location, int order) {
         List<Map<?, ?>> list = getList(type);
 
         Map<String, Object> entry = new HashMap<>();
@@ -52,7 +49,23 @@ public class ItemLink {
         entry.put("x", (int) location.getX());
         entry.put("y", (int) location.getY());
         entry.put("z", (int) location.getZ());
+        entry.put("order", order);
         list.add(entry);
+
+        list.sort((entry1, entry2) -> {
+            Integer entry1order = (Integer) entry1.getOrDefault("order", null);
+            Integer entry2order = (Integer) entry2.getOrDefault("order", null);
+
+            if (entry1order == null) {
+                entry1order = 0;
+            }
+
+            if (entry2order == null) {
+                entry2order = 0;
+            }
+
+            return Integer.compare(entry1order, entry2order);
+        });
 
         setList(type, list);
     }
@@ -103,16 +116,16 @@ public class ItemLink {
         return getLocations(TYPE_TARGET);
     }
 
-    public void addSource(Location location) {
-        addLocation(TYPE_SOURCE, location);
+    public void addSource(Location location, int order) {
+        addLocation(TYPE_SOURCE, location, order);
     }
 
     public void removeSource(Location location) {
         removeLocation(TYPE_SOURCE, location);
     }
 
-    public void addTarget(Location location) {
-        addLocation(TYPE_TARGET, location);
+    public void addTarget(Location location, int order) {
+        addLocation(TYPE_TARGET, location, order);
     }
 
     public void removeTarget(Location location) {
