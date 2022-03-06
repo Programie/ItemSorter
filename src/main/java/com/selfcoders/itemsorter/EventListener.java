@@ -32,6 +32,12 @@ public class EventListener implements Listener {
             return;
         }
 
+        if (!player.hasPermission("itemsorter.create")) {
+            player.sendMessage(ChatColor.RED + "You do not have the required permissions to create ItemSorter signs!");
+            block.breakNaturally();
+            return;
+        }
+
         if (!(blockData instanceof WallSign)) {
             player.sendMessage(ChatColor.RED + "An ItemSorter sign must be attached to an inventory block (i.e. chest or hopper)!");
             block.breakNaturally();
@@ -81,6 +87,7 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
+        Player player = event.getPlayer();
         Block block = event.getBlock();
         Material blockType = block.getType();
         org.bukkit.block.Sign signBlock;
@@ -94,6 +101,12 @@ public class EventListener implements Listener {
         }
 
         if (signBlock == null) {
+            return;
+        }
+
+        if (!player.hasPermission("itemsorter.create")) {
+            player.sendMessage(ChatColor.RED + "You do not have the required permissions to destroy ItemSorter signs!");
+            event.setCancelled(true);
             return;
         }
 

@@ -5,3 +5,10 @@ author: Programie
 website: ${project.url}
 api-version: 1.14
 main: com.selfcoders.itemsorter.ItemSorter
+permissions:
+  itemsorter.*:
+    children:
+      - itemsorter.create
+  itemsorter.create:
+    description: 'Allow to create ItemSorter signs'
+    default: true
