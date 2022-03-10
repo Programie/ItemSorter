@@ -133,7 +133,10 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void onInventoryMoveItemEvent(InventoryMoveItemEvent event) {
-        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> updateInventory(event.getDestination()), 1L);
+        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> {
+            updateInventory(event.getSource());
+            updateInventory(event.getDestination());
+        }, 1L);
     }
 
     @EventHandler
