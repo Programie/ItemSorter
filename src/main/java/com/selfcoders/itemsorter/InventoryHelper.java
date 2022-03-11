@@ -17,7 +17,12 @@ public class InventoryHelper {
         List<Inventory> inventories = new ArrayList<>();
 
         for (Location location : locations) {
-            inventories.add(getInventoryForLocation(location));
+            Inventory inventory = getInventoryForLocation(location);
+            if (inventory == null) {
+                continue;
+            }
+
+            inventories.add(inventory);
         }
 
         return inventories;
