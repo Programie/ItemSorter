@@ -1,5 +1,6 @@
 package com.selfcoders.itemsorter;
 
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -10,7 +11,13 @@ public class ItemSorter extends JavaPlugin {
 
         PluginManager pluginManager = getServer().getPluginManager();
 
-        pluginManager.registerEvents(new EventListener(this), this);
+        FileConfiguration config = getConfig();
+
+        boolean allowCrossWorldConnections = config.getBoolean("allow-cross-world-connections");
+        int maxDistance = config.getInt("max-distance");
+
+        InventoryHelper inventoryHelper = new InventoryHelper(allowCrossWorldConnections, maxDistance);
+        pluginManager.registerEvents(new EventListener(this, inventoryHelper), this);
     }
 
     ItemLink getItemLink(String name) {

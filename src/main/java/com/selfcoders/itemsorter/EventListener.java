@@ -16,9 +16,11 @@ import java.util.List;
 
 public class EventListener implements Listener {
     private final ItemSorter plugin;
+    private final InventoryHelper inventoryHelper;
 
-    public EventListener(ItemSorter plugin) {
+    public EventListener(ItemSorter plugin, InventoryHelper inventoryHelper) {
         this.plugin = plugin;
+        this.inventoryHelper = inventoryHelper;
     }
 
     @EventHandler
@@ -150,14 +152,14 @@ public class EventListener implements Listener {
     }
 
     private void updateInventoryForSource(ItemLink itemLink, Inventory inventory) {
-        InventoryHelper.moveInventoryContentsToTargets(inventory, itemLink.getTargets());
+        inventoryHelper.moveInventoryContentsToTargets(inventory, itemLink.getTargets());
     }
 
     private void updateInventoryForTarget(ItemLink itemLink) {
-        List<Inventory> inventories = InventoryHelper.getInventories(itemLink.getSources());
+        List<Inventory> inventories = inventoryHelper.getInventories(itemLink.getSources());
 
         for (Inventory inventory : inventories) {
-            InventoryHelper.moveInventoryContentsToTargets(inventory, itemLink.getTargets());
+            inventoryHelper.moveInventoryContentsToTargets(inventory, itemLink.getTargets());
         }
     }
 

@@ -1,0 +1,6 @@
+# Whether to allow connections across worlds (i.e. between Nether and Overworld)
+allow-cross-world-connections: false
+
+# Maximum distance between source and target chests (0 = unlimited)
+# Note: This automatically disables "allow-cross-world-connections"
+max-distance: 100
