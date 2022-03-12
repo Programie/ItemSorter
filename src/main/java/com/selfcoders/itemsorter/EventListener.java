@@ -95,6 +95,15 @@ public class EventListener implements Listener {
             return;
         }
 
+        player.sendMessage(ChatColor.GREEN + "ItemSorter sign placed successfully.");
+
+        try {
+            int totalLocations = plugin.getDatabase().getLocations(player, signData.name, signData.isSource() ? SignHelper.TYPE_TARGET : SignHelper.TYPE_SOURCE).size();
+            player.sendMessage(ChatColor.GREEN + "This chest is now connected to " + totalLocations + " other chests.");
+        } catch (SQLException exception) {
+            plugin.getLogger().severe("Unable to get locations from database: " + exception.getMessage());
+        }
+
         Container containerBlock = (Container) attachedToBlockState;
         Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> updateInventory(containerBlock.getInventory()), 1L);
     }
@@ -150,6 +159,16 @@ public class EventListener implements Listener {
             plugin.getLogger().severe("Unable to remove location from database: " + exception.getMessage());
             player.sendMessage(ChatColor.RED + "An error occurred while removing the sign!");
             event.setCancelled(true);
+            return;
+        }
+
+        player.sendMessage(ChatColor.GREEN + "ItemSorter sign removed successfully.");
+
+        try {
+            int totalLocations = plugin.getDatabase().getLocations(player, signData.name).size();
+            player.sendMessage(ChatColor.GREEN + "You own " + totalLocations + " other chests with the same name.");
+        } catch (SQLException exception) {
+            plugin.getLogger().severe("Unable to get locations from database: " + exception.getMessage());
         }
     }
 

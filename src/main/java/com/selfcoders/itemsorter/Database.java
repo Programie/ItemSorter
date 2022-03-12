@@ -94,6 +94,15 @@ class Database {
         return getLocations(statement);
     }
 
+    List<Location> getLocations(Player player, String name) throws SQLException {
+        PreparedStatement statement = connection.prepareStatement("SELECT `world`, `x`, `y`, `z` FROM `links` WHERE `uuid` = ? AND `name` = ? ORDER BY `order`");
+
+        statement.setString(1, player.getUniqueId().toString());
+        statement.setString(2, name);
+
+        return getLocations(statement);
+    }
+
     List<Location> getLocations(PreparedStatement statement) throws SQLException {
         List<Location> locations = new ArrayList<>();
 
