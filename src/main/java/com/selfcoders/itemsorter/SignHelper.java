@@ -13,8 +13,10 @@ import java.util.Arrays;
 import java.util.List;
 
 public class SignHelper {
-    final static String SOURCE_TAG = "[ItemSource]";
-    final static String TARGET_TAG = "[ItemTarget]";
+    final static String TAG_SOURCE = "[ItemSource]";
+    final static String TAG_TARGET = "[ItemTarget]";
+    static final String TYPE_SOURCE = "source";
+    static final String TYPE_TARGET = "target";
     final static List<BlockFace> BLOCK_FACES = Arrays.asList(BlockFace.UP, BlockFace.EAST, BlockFace.NORTH, BlockFace.WEST, BlockFace.SOUTH);
 
     /**
@@ -132,6 +134,6 @@ public class SignHelper {
     static boolean checkSign(Sign sign) {
         String tagLine = ChatColor.stripColor(sign.getLine(0));
 
-        return tagLine.equalsIgnoreCase(SOURCE_TAG) || tagLine.equalsIgnoreCase(TARGET_TAG);
+        return tagLine.equalsIgnoreCase(TAG_SOURCE) || tagLine.equalsIgnoreCase(TAG_TARGET);
     }
 }

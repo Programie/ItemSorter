@@ -12,6 +12,7 @@ import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.Inventory;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public class EventListener implements Listener {
@@ -62,9 +63,9 @@ public class EventListener implements Listener {
         }
 
         if (signData.isSource()) {
-            event.setLine(0, ChatColor.BLUE + SignHelper.SOURCE_TAG);
+            event.setLine(0, ChatColor.BLUE + SignHelper.TAG_SOURCE);
         } else if (signData.isTarget()) {
-            event.setLine(0, ChatColor.BLUE + SignHelper.TARGET_TAG);
+            event.setLine(0, ChatColor.BLUE + SignHelper.TAG_TARGET);
         } else {
             player.sendMessage(ChatColor.RED + "First line must be either [ItemSource] or [ItemTarget]!");
             block.breakNaturally();
@@ -76,15 +77,23 @@ public class EventListener implements Listener {
         // Ensure name of player is not modified
         signData.player = player.getName();
 
-        ItemLink itemLink = plugin.getItemLink(signData);
-
+        String type;
         if (signData.isSource()) {
-            itemLink.addSource(block.getLocation(), signData.order);
+            type = SignHelper.TYPE_SOURCE;
         } else if (signData.isTarget()) {
-            itemLink.addTarget(block.getLocation(), signData.order);
+            type = SignHelper.TYPE_TARGET;
+        } else {
+            return;
         }
 
-        plugin.saveConfig();
+        try {
+            plugin.getDatabase().addLocation(player, signData.name, type, block.getLocation(), signData.order);
+        } catch (SQLException exception) {
+            plugin.getLogger().severe("Unable to add location to database: " + exception.getMessage());
+            player.sendMessage(ChatColor.RED + "An error occurred while adding the sign!");
+            block.breakNaturally();
+            return;
+        }
 
         Container containerBlock = (Container) attachedToBlockState;
         Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> updateInventory(containerBlock.getInventory()), 1L);
@@ -126,15 +135,22 @@ public class EventListener implements Listener {
             }
         }
 
-        ItemLink itemLink = plugin.getItemLink(signData);
-
+        String type;
         if (signData.isSource()) {
-            itemLink.removeSource(block.getLocation());
+            type = SignHelper.TYPE_SOURCE;
         } else if (signData.isTarget()) {
-            itemLink.removeTarget(block.getLocation());
+            type = SignHelper.TYPE_TARGET;
+        } else {
+            return;
         }
 
-        plugin.saveConfig();
+        try {
+            plugin.getDatabase().removeLocation(signData.player, signData.name, type, signBlock.getLocation());
+        } catch (SQLException exception) {
+            plugin.getLogger().severe("Unable to remove location from database: " + exception.getMessage());
+            player.sendMessage(ChatColor.RED + "An error occurred while removing the sign!");
+            event.setCancelled(true);
+        }
     }
 
     @EventHandler
@@ -160,15 +176,35 @@ public class EventListener implements Listener {
         Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> updateInventory(event.getInventory()), 1L);
     }
 
-    private void updateInventoryForSource(ItemLink itemLink, Inventory inventory) {
-        inventoryHelper.moveInventoryContentsToTargets(inventory, itemLink.getTargets());
+    private void updateInventoryForSource(SignData signData, Inventory inventory) {
+        List<Location> targetLocations;
+
+        try {
+            targetLocations = plugin.getDatabase().getLocations(signData.player, signData.name, SignHelper.TYPE_TARGET);
+        } catch (SQLException exception) {
+            plugin.getLogger().severe("Unable to get locations from database: " + exception.getMessage());
+            return;
+        }
+
+        inventoryHelper.moveInventoryContentsToTargets(inventory, targetLocations);
     }
 
-    private void updateInventoryForTarget(ItemLink itemLink) {
-        List<Inventory> inventories = inventoryHelper.getInventories(itemLink.getSources());
+    private void updateInventoryForTarget(SignData signData) {
+        List<Location> sourceLocations;
+        List<Location> targetLocations;
+
+        try {
+            sourceLocations = plugin.getDatabase().getLocations(signData.player, signData.name, SignHelper.TYPE_SOURCE);
+            targetLocations = plugin.getDatabase().getLocations(signData.player, signData.name, SignHelper.TYPE_TARGET);
+        } catch (SQLException exception) {
+            plugin.getLogger().severe("Unable to get locations from database: " + exception.getMessage());
+            return;
+        }
+
+        List<Inventory> inventories = inventoryHelper.getInventories(sourceLocations);
 
         for (Inventory inventory : inventories) {
-            inventoryHelper.moveInventoryContentsToTargets(inventory, itemLink.getTargets());
+            inventoryHelper.moveInventoryContentsToTargets(inventory, targetLocations);
         }
     }
 
@@ -178,12 +214,10 @@ public class EventListener implements Listener {
             return;
         }
 
-        ItemLink itemLink = plugin.getItemLink(signData);
-
         if (signData.isSource()) {
-            updateInventoryForSource(itemLink, inventory);
+            updateInventoryForSource(signData, inventory);
         } else if (signData.isTarget()) {
-            updateInventoryForTarget(itemLink);
+            updateInventoryForTarget(signData);
         }
     }
 }

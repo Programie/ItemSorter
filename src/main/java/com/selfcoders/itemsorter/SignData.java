@@ -54,7 +54,7 @@ public class SignData {
             return false;
         }
 
-        return tagLine.equalsIgnoreCase(ItemLink.TYPE_SOURCE) || tagLine.equalsIgnoreCase(ItemLink.TYPE_TARGET);
+        return tagLine.equalsIgnoreCase(SignHelper.TAG_SOURCE) || tagLine.equalsIgnoreCase(SignHelper.TAG_TARGET);
     }
 
     boolean checkName() {
@@ -70,7 +70,7 @@ public class SignData {
             return false;
         }
 
-        return tagLine.equalsIgnoreCase(ItemLink.TYPE_SOURCE);
+        return tagLine.equalsIgnoreCase(SignHelper.TAG_SOURCE);
     }
 
     boolean isTarget() {
@@ -78,6 +78,6 @@ public class SignData {
             return false;
         }
 
-        return tagLine.equalsIgnoreCase(ItemLink.TYPE_TARGET);
+        return tagLine.equalsIgnoreCase(SignHelper.TAG_TARGET);
     }
 }

@@ -16,24 +16,23 @@ When transferring the items from the source chest into the target chests, the pl
 
 ## Permissions
 
-* `itemsorter.create` - Allow to create and destroy signs (Default: everyone)
+* `itemsorter.create` - Allow to create and destroy your own ItemSorter signs' (Default: everyone)
+* `itemsorter.destroyAny` - Allow to destroy any ItemSorter signs (not just your own) (Default: op)
 * `itemsorter.*` - Allow access to all features (Default: op)
 
 ## How to use it?
 
 Simply place a sign at the side of any inventory block (chest, barrel, hopper, etc.) you would like to use as the source chest containing the following content:
 
-* First line: `[ItemSorter]`
-* Second line: `SOURCE`
-* Third line: Any unique name used by the other connected chests
+* First line: `[ItemSource]`
+* Second line: Any unique name used by the other connected chests
 
 This will define the chest as an item source (i.e. the chest you will throw in your items for the plugin to sort them for you).
 
 After that, place a sign at the side of any inventory block (chest, barrel, hopper, etc.) you would like to use as the target chest containing the following content:
 
-* First line: `[ItemSorter]`
-* Second line: `TARGET`
-* Third line: Any unique name used by the other connected chests
+* First line: `[ItemTarget]`
+* Second line: Any unique name used by the other connected chests
 
 This will define the chest as an item target (i.e. the chest your items will be moved to).
 
@@ -51,9 +50,9 @@ To archive that type of target chest order, simply define the order using `o:<an
 
 Example:
 
-* First line: `[ItemSorter]`
-* Second line: `TARGET`
-* Third line: Any unique name used by the other connected chests
+* First line: `[ItemTarget]`
+* Second line: Any unique name used by the other connected chests
+* Third line: Keep empty (will be replaced with your player name)
 * Fourth line: `o:10`
 
 A lower number means the chest is used before another with a higher number. By default, any target chest without the order option will have the order number `0`.

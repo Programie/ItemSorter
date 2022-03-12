@@ -5,6 +5,8 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class ItemSorter extends JavaPlugin {
+    private Database database;
+
     @Override
     public void onEnable() {
         saveDefaultConfig();
@@ -16,15 +18,19 @@ public class ItemSorter extends JavaPlugin {
         boolean allowCrossWorldConnections = config.getBoolean("allow-cross-world-connections");
         int maxDistance = config.getInt("max-distance");
 
+        try {
+            database = new Database(this);
+        } catch (Exception exception) {
+            getLogger().severe("Unable to initialize database: " + exception.getMessage());
+            pluginManager.disablePlugin(this);
+            return;
+        }
+
         InventoryHelper inventoryHelper = new InventoryHelper(allowCrossWorldConnections, maxDistance);
         pluginManager.registerEvents(new EventListener(this, inventoryHelper), this);
     }
 
-    ItemLink getItemLink(String player, String name) {
-        return new ItemLink(getConfig(), this, player, name);
-    }
-
-    ItemLink getItemLink(SignData signData) {
-        return getItemLink(signData.player, signData.name);
+    Database getDatabase() {
+        return database;
     }
 }
