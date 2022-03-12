@@ -12,16 +12,22 @@ public class ItemLink {
 
     private final FileConfiguration fileConfiguration;
     private final JavaPlugin plugin;
+    private final String player;
     private final String name;
 
-    ItemLink(FileConfiguration fileConfiguration, ItemSorter plugin, String name) {
+    ItemLink(FileConfiguration fileConfiguration, ItemSorter plugin, String player, String name) {
         this.fileConfiguration = fileConfiguration;
         this.plugin = plugin;
+        this.player = player;
         this.name = name;
     }
 
+    private String getConfigPath() {
+        return "links." + player + "." + name;
+    }
+
     private String getConfigPath(String type) {
-        return "links." + name + "." + type;
+        return getConfigPath() + "." + type;
     }
 
     private List<Map<?, ?>> getList(String type) {
@@ -34,7 +40,7 @@ public class ItemLink {
 
             // Remove whole link from config if source and target does not exist
             if (fileConfiguration.get(getConfigPath(TYPE_SOURCE)) == null && fileConfiguration.get(getConfigPath(TYPE_TARGET)) == null) {
-                fileConfiguration.set("links." + name, null);
+                fileConfiguration.set(getConfigPath(), null);
             }
         } else {
             fileConfiguration.set(getConfigPath(type), list);

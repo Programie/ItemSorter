@@ -5,8 +5,8 @@ import org.bukkit.block.Sign;
 
 public class SignData {
     String tagLine;
-    String type;
     String name;
+    String player;
     Integer order = 0;
 
     SignData(String[] lines) {
@@ -15,11 +15,11 @@ public class SignData {
         }
 
         if (lines.length >= 2) {
-            type = ChatColor.stripColor(lines[1]);
+            name = ChatColor.stripColor(lines[1]);
         }
 
         if (lines.length >= 3) {
-            name = ChatColor.stripColor(lines[2]);
+            player = ChatColor.stripColor(lines[2]);
         }
 
         if (lines.length >= 4) {
@@ -54,15 +54,7 @@ public class SignData {
             return false;
         }
 
-        return tagLine.equalsIgnoreCase(SignHelper.SIGN_TAG);
-    }
-
-    boolean checkType() {
-        if (type == null) {
-            return false;
-        }
-
-        return type.equalsIgnoreCase(ItemLink.TYPE_SOURCE) || type.equalsIgnoreCase(ItemLink.TYPE_TARGET);
+        return tagLine.equalsIgnoreCase(ItemLink.TYPE_SOURCE) || tagLine.equalsIgnoreCase(ItemLink.TYPE_TARGET);
     }
 
     boolean checkName() {
@@ -74,18 +66,18 @@ public class SignData {
     }
 
     boolean isSource() {
-        if (type == null) {
+        if (tagLine == null) {
             return false;
         }
 
-        return type.equalsIgnoreCase(ItemLink.TYPE_SOURCE);
+        return tagLine.equalsIgnoreCase(ItemLink.TYPE_SOURCE);
     }
 
     boolean isTarget() {
-        if (type == null) {
+        if (tagLine == null) {
             return false;
         }
 
-        return type.equalsIgnoreCase(ItemLink.TYPE_TARGET);
+        return tagLine.equalsIgnoreCase(ItemLink.TYPE_TARGET);
     }
 }

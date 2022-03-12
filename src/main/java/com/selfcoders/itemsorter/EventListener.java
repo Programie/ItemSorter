@@ -55,30 +55,30 @@ public class EventListener implements Listener {
             return;
         }
 
-        if (!signData.checkType()) {
-            player.sendMessage(ChatColor.RED + "Text on the second line must be either '" + ItemLink.TYPE_SOURCE + "' or '" + ItemLink.TYPE_TARGET + "'!");
-            block.breakNaturally();
-            return;
-        }
-
         if (!signData.checkName()) {
-            player.sendMessage(ChatColor.RED + "No name specified on the third line!");
+            player.sendMessage(ChatColor.RED + "No name specified on the second line!");
             block.breakNaturally();
             return;
         }
 
-        event.setLine(0, ChatColor.BLUE + SignHelper.SIGN_TAG);
-        event.setLine(1, signData.type.toUpperCase());
+        if (signData.isSource()) {
+            event.setLine(0, ChatColor.BLUE + SignHelper.SOURCE_TAG);
+        } else if (signData.isTarget()) {
+            event.setLine(0, ChatColor.BLUE + SignHelper.TARGET_TAG);
+        } else {
+            player.sendMessage(ChatColor.RED + "First line must be either [ItemSource] or [ItemTarget]!");
+            block.breakNaturally();
+            return;
+        }
 
-        ItemLink itemLink = plugin.getItemLink(signData.name);
+        event.setLine(2, player.getName());
 
-        switch (signData.type.toLowerCase()) {
-            case ItemLink.TYPE_SOURCE:
-                itemLink.addSource(block.getLocation(), signData.order);
-                break;
-            case ItemLink.TYPE_TARGET:
-                itemLink.addTarget(block.getLocation(), signData.order);
-                break;
+        ItemLink itemLink = plugin.getItemLink(signData);
+
+        if (signData.isSource()) {
+            itemLink.addSource(block.getLocation(), signData.order);
+        } else if (signData.isTarget()) {
+            itemLink.addTarget(block.getLocation(), signData.order);
         }
 
         plugin.saveConfig();
@@ -106,7 +106,7 @@ public class EventListener implements Listener {
             return;
         }
 
-        if (!player.hasPermission("itemsorter.create")) {
+        if (!player.hasPermission("itemsorter.create") && !player.hasPermission("itemsorter.destroyAny")) {
             player.sendMessage(ChatColor.RED + "You do not have the required permissions to destroy ItemSorter signs!");
             event.setCancelled(true);
             return;
@@ -114,15 +114,21 @@ public class EventListener implements Listener {
 
         SignData signData = new SignData(signBlock.getLines());
 
-        ItemLink itemLink = plugin.getItemLink(signData.name);
+        if (!player.hasPermission("itemsorter.destroyAny")) {
+            Player signOwner = plugin.getServer().getPlayer(signData.player);
+            if (signOwner != null && signOwner.getUniqueId() != player.getUniqueId()) {
+                player.sendMessage(ChatColor.RED + "You can only destroy your own ItemSorter signs!");
+                event.setCancelled(true);
+                return;
+            }
+        }
 
-        switch (signData.type.toLowerCase()) {
-            case ItemLink.TYPE_SOURCE:
-                itemLink.removeSource(signBlock.getLocation());
-                break;
-            case ItemLink.TYPE_TARGET:
-                itemLink.removeTarget(signBlock.getLocation());
-                break;
+        ItemLink itemLink = plugin.getItemLink(signData);
+
+        if (signData.isSource()) {
+            itemLink.removeSource(block.getLocation());
+        } else if (signData.isTarget()) {
+            itemLink.removeTarget(block.getLocation());
         }
 
         plugin.saveConfig();
@@ -169,15 +175,12 @@ public class EventListener implements Listener {
             return;
         }
 
-        ItemLink itemLink = plugin.getItemLink(signData.name);
+        ItemLink itemLink = plugin.getItemLink(signData);
 
-        switch (signData.type.toLowerCase()) {
-            case ItemLink.TYPE_SOURCE:
-                updateInventoryForSource(itemLink, inventory);
-                break;
-            case ItemLink.TYPE_TARGET:
-                updateInventoryForTarget(itemLink);
-                break;
+        if (signData.isSource()) {
+            updateInventoryForSource(itemLink, inventory);
+        } else if (signData.isTarget()) {
+            updateInventoryForTarget(itemLink);
         }
     }
 }

@@ -20,7 +20,11 @@ public class ItemSorter extends JavaPlugin {
         pluginManager.registerEvents(new EventListener(this, inventoryHelper), this);
     }
 
-    ItemLink getItemLink(String name) {
-        return new ItemLink(getConfig(), this, name);
+    ItemLink getItemLink(String player, String name) {
+        return new ItemLink(getConfig(), this, player, name);
+    }
+
+    ItemLink getItemLink(SignData signData) {
+        return getItemLink(signData.player, signData.name);
     }
 }

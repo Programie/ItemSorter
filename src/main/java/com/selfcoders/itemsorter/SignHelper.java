@@ -13,7 +13,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class SignHelper {
-    final static String SIGN_TAG = "[ItemSorter]";
+    final static String SOURCE_TAG = "[ItemSource]";
+    final static String TARGET_TAG = "[ItemTarget]";
     final static List<BlockFace> BLOCK_FACES = Arrays.asList(BlockFace.UP, BlockFace.EAST, BlockFace.NORTH, BlockFace.WEST, BlockFace.SOUTH);
 
     /**
@@ -31,14 +32,14 @@ public class SignHelper {
                 continue;
             }
 
-            org.bukkit.block.Sign signBlock = (org.bukkit.block.Sign) faceBlock.getState();
+            Sign signBlock = (Sign) faceBlock.getState();
             BlockFace attachedFace = ((WallSign) signBlock.getBlockData()).getFacing();
 
             if (!blockFace.equals(attachedFace)) {
                 continue;
             }
 
-            if (!ChatColor.stripColor(signBlock.getLine(0)).equalsIgnoreCase(SIGN_TAG)) {
+            if (!checkSign(signBlock)) {
                 continue;
             }
 
@@ -69,7 +70,7 @@ public class SignHelper {
 
         Sign signBlock = (Sign) blockState;
 
-        if (!ChatColor.stripColor(signBlock.getLine(0)).equalsIgnoreCase(SIGN_TAG)) {
+        if (!checkSign(signBlock)) {
             return null;
         }
 
@@ -126,5 +127,11 @@ public class SignHelper {
         }
 
         return null;
+    }
+
+    static boolean checkSign(Sign sign) {
+        String tagLine = ChatColor.stripColor(sign.getLine(0));
+
+        return tagLine.equalsIgnoreCase(SOURCE_TAG) || tagLine.equalsIgnoreCase(TARGET_TAG);
     }
 }

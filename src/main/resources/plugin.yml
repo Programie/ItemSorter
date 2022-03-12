@@ -9,6 +9,10 @@ permissions:
   itemsorter.*:
     children:
       - itemsorter.create
+      - itemsorter.destroyAny
   itemsorter.create:
-    description: 'Allow to create ItemSorter signs'
+    description: 'Allow to create and destroy your own ItemSorter signs'
     default: true
+  itemsorter.destroyAny:
+    description: 'Allow to destroy any ItemSorter signs (not just your own)'
+    default: op
