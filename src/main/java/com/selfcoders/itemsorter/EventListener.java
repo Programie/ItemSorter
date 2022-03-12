@@ -73,6 +73,9 @@ public class EventListener implements Listener {
 
         event.setLine(2, player.getName());
 
+        // Ensure name of player is not modified
+        signData.player = player.getName();
+
         ItemLink itemLink = plugin.getItemLink(signData);
 
         if (signData.isSource()) {
