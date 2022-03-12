@@ -10,6 +10,7 @@ permissions:
     children:
       - itemsorter.create
       - itemsorter.destroyAny
+    default: op
   itemsorter.create:
     description: 'Allow to create and destroy your own ItemSorter signs'
     default: true
