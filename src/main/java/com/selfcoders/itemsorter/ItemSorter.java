@@ -27,7 +27,7 @@ public class ItemSorter extends JavaPlugin {
         }
 
         InventoryHelper inventoryHelper = new InventoryHelper(allowCrossWorldConnections, maxDistance);
-        pluginManager.registerEvents(new EventListener(this, inventoryHelper), this);
+        pluginManager.registerEvents(new EventListener(this, inventoryHelper, allowCrossWorldConnections, maxDistance), this);
     }
 
     Database getDatabase() {

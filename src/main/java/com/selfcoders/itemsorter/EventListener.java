@@ -7,21 +7,28 @@ import org.bukkit.block.data.type.WallSign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.inventory.*;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class EventListener implements Listener {
     private final ItemSorter plugin;
     private final InventoryHelper inventoryHelper;
+    private final boolean allowCrossWorldConnections;
+    private final int maxDistance;
 
-    public EventListener(ItemSorter plugin, InventoryHelper inventoryHelper) {
+    public EventListener(ItemSorter plugin, InventoryHelper inventoryHelper, boolean allowCrossWorldConnections, int maxDistance) {
         this.plugin = plugin;
         this.inventoryHelper = inventoryHelper;
+        this.allowCrossWorldConnections = allowCrossWorldConnections;
+        this.maxDistance = maxDistance;
     }
 
     @EventHandler
@@ -173,6 +180,56 @@ public class EventListener implements Listener {
     }
 
     @EventHandler
+    public void onPlayerInteractEvent(PlayerInteractEvent event) {
+        if (event.getAction() != Action.LEFT_CLICK_BLOCK) {
+            return;
+        }
+
+        Block block = event.getClickedBlock();
+        Player player = event.getPlayer();
+
+        Material blockType = block.getType();
+        if (!Tag.SIGNS.isTagged(blockType)) {
+            return;
+        }
+
+        Sign signBlock = SignHelper.getSignFromBlock(block);
+        if (signBlock == null) {
+            return;
+        }
+
+        SignData signData = new SignData(signBlock.getLines());
+        if (!signData.isItemSorterSign()) {
+            return;
+        }
+
+        Location signLocation = signBlock.getLocation();
+        List<Location> sourceLocations = null;
+        List<Location> targetLocations = null;
+
+        try {
+            sourceLocations = plugin.getDatabase().getLocations(signData.player, signData.name, SignHelper.TYPE_SOURCE);
+            targetLocations = plugin.getDatabase().getLocations(signData.player, signData.name, SignHelper.TYPE_TARGET);
+        } catch (SQLException exception) {
+            plugin.getLogger().severe("Unable to get locations from database: " + exception.getMessage());
+        }
+
+        List<String> messages = new ArrayList<>();
+        messages.add(ChatColor.GREEN + "*** Info for this ItemSorter sign ***");
+        messages.add("This sign is owned by " + ChatColor.YELLOW + signData.player);
+        if (sourceLocations != null && targetLocations != null) {
+            messages.add("There are " + ChatColor.YELLOW + (sourceLocations.size() + targetLocations.size()) + ChatColor.RESET + " signs using the name " + ChatColor.YELLOW + signData.name + ChatColor.RESET + " (" + ChatColor.YELLOW + sourceLocations.size() + ChatColor.RESET + " sources and " + ChatColor.YELLOW + targetLocations.size() + ChatColor.RESET + " targets)");
+            if (signData.isSource()) {
+                addMessageForLocations(messages, signLocation, targetLocations);
+            } else if (signData.isTarget()) {
+                addMessageForLocations(messages, signLocation, sourceLocations);
+            }
+        }
+
+        player.sendMessage(messages.toArray(new String[0]));
+    }
+
+    @EventHandler
     public void onInventoryCloseEvent(InventoryCloseEvent event) {
         updateInventory(event.getInventory());
     }
@@ -237,6 +294,25 @@ public class EventListener implements Listener {
             updateInventoryForSource(signData, inventory);
         } else if (signData.isTarget()) {
             updateInventoryForTarget(signData);
+        }
+    }
+
+    private void addMessageForLocations(List<String> messages, Location signLocation, List<Location> locations) {
+        for (Location location : locations) {
+            Integer distance = Util.getDistance(signLocation, location);
+
+            if (allowCrossWorldConnections && distance == null) {
+                continue;
+            }
+
+            if (distance == null) {
+                messages.add(ChatColor.RED + "Note: A connected sign is in a different world '" + location.getWorld().getName() + "' and therefore can't be reached!");
+                continue;
+            }
+
+            if (distance > maxDistance) {
+                messages.add(ChatColor.RED + "Note: Sign at " + location.getX() + ", " + location.getY() + ", " + location.getZ() + " exceeds the maximum distance (" + distance + " > " + maxDistance + " blocks)!");
+            }
         }
     }
 }
