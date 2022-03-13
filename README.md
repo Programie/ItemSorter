@@ -14,6 +14,13 @@ ItemSorter allows players to automatically sort items from a chest (or any other
 
 When transferring the items from the source chest into the target chests, the plugin takes a look of already existing items in the target chests and moves items into the chest already containing the specific item type.
 
+## Configuration
+
+The following options can be configured in the config.yml of the plugin (created on the first load):
+
+* `allow-cross-world-connections` - Allow to connect signs between worlds (i.e. transfer items from the Nether to the Overworld) (`true` or `false`, default: `false`)
+* `max-distance` - The maximum distance between source and target chests (`0` = unlimited, default: `100`)
+
 ## Permissions
 
 * `itemsorter.create` - Allow to create and destroy your own ItemSorter signs' (Default: everyone)
