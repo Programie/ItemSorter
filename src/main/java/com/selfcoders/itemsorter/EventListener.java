@@ -310,7 +310,7 @@ public class EventListener implements Listener {
                 continue;
             }
 
-            if (distance > maxDistance) {
+            if (maxDistance > 0 && distance > maxDistance) {
                 messages.add(ChatColor.RED + "Note: Sign at " + location.getX() + ", " + location.getY() + ", " + location.getZ() + " exceeds the maximum distance (" + distance + " > " + maxDistance + " blocks)!");
             }
         }
