@@ -93,8 +93,10 @@ public class EventListener implements Listener {
             return;
         }
 
+        Location signLocation = block.getLocation();
+
         try {
-            plugin.getDatabase().addLocation(player, signData.name, type, block.getLocation(), signData.order);
+            plugin.getDatabase().addLocation(player, signData.name, type, signLocation, signData.order);
         } catch (SQLException exception) {
             plugin.getLogger().severe("Unable to add location to database: " + exception.getMessage());
             player.sendMessage(ChatColor.RED + "An error occurred while adding the sign!");
@@ -105,8 +107,39 @@ public class EventListener implements Listener {
         player.sendMessage(ChatColor.GREEN + "ItemSorter sign placed successfully.");
 
         try {
-            int totalLocations = plugin.getDatabase().getLocations(player, signData.name, signData.isSource() ? SignHelper.TYPE_TARGET : SignHelper.TYPE_SOURCE).size();
-            player.sendMessage(ChatColor.GREEN + "This chest is now connected to " + totalLocations + " other chests.");
+            List<Location> otherLocations = plugin.getDatabase().getLocations(player, signData.name, signData.isSource() ? SignHelper.TYPE_TARGET : SignHelper.TYPE_SOURCE);
+            int reachableLocations = 0;
+            int totalLocations = otherLocations.size();
+
+            for (Location otherLocation : otherLocations) {
+                Integer distance = Util.getDistance(signLocation, otherLocation);
+
+                if (allowCrossWorldConnections && distance == null) {
+                    reachableLocations++;
+                    continue;
+                }
+
+                if (maxDistance == 0 && distance != null) {
+                    reachableLocations++;
+                    continue;
+                }
+
+                if (distance != null && distance <= maxDistance) {
+                    reachableLocations++;
+                }
+            }
+
+            if (totalLocations > 0) {
+                if (reachableLocations == 0) {
+                    player.sendMessage(ChatColor.RED + "This chest is out of range of any other chest!");
+                } else if (reachableLocations < totalLocations) {
+                    player.sendMessage(ChatColor.YELLOW + "This chest is now connected to " + totalLocations + " other chests but only " + reachableLocations + " are reachable.");
+                } else {
+                    player.sendMessage(ChatColor.GREEN + "This chest is now connected to " + totalLocations + " other chests.");
+                }
+            } else {
+                player.sendMessage(ChatColor.GREEN + "This chest is not connected to any other chest.");
+            }
         } catch (SQLException exception) {
             plugin.getLogger().severe("Unable to get locations from database: " + exception.getMessage());
         }
