@@ -113,7 +113,7 @@ public class EventListener implements Listener {
         Player player = event.getPlayer();
         Block block = event.getBlock();
         Material blockType = block.getType();
-        org.bukkit.block.Sign signBlock;
+        Sign signBlock;
 
         if (Tag.SIGNS.isTagged(blockType)) {
             // Is a sign
