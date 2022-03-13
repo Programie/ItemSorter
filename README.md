@@ -66,6 +66,10 @@ A lower number means the chest is used before another with a higher number. By d
 
 If you define multiple chests with the same order number, the order of those chests might be random.
 
+### Show info about sign
+
+Clicking on a ItemSorter sign (left or right click) shows some information about the sign as well as it's connection to the other signs/chests.
+
 ## Build
 
 You can build the project in the following 2 steps:
