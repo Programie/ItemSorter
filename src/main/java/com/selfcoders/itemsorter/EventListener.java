@@ -214,12 +214,10 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void onPlayerInteractEvent(PlayerInteractEvent event) {
-        if (event.getAction() != Action.LEFT_CLICK_BLOCK) {
+        Block block = event.getClickedBlock();
+        if (block == null) {
             return;
         }
-
-        Block block = event.getClickedBlock();
-        Player player = event.getPlayer();
 
         Material blockType = block.getType();
         if (!Tag.SIGNS.isTagged(blockType)) {
@@ -259,7 +257,7 @@ public class EventListener implements Listener {
             }
         }
 
-        player.sendMessage(messages.toArray(new String[0]));
+        event.getPlayer().sendMessage(messages.toArray(new String[0]));
     }
 
     @EventHandler
