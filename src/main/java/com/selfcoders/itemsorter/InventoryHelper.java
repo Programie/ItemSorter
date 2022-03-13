@@ -118,11 +118,8 @@ public class InventoryHelper {
             }
 
             if (maxDistance > 0) {
-                double distanceX = Math.abs(targetLocation.getX() - sourceLocation.getX());
-                double distanceY = Math.abs(targetLocation.getY() - sourceLocation.getY());
-                double distanceZ = Math.abs(targetLocation.getZ() - sourceLocation.getZ());
-
-                if (!isSameWorld || distanceX > maxDistance || distanceY > maxDistance || distanceZ > maxDistance) {
+                Integer distance = Util.getDistance(sourceLocation, targetLocation);
+                if (distance == null || distance > maxDistance) {
                     continue;
                 }
             }
