@@ -78,6 +78,22 @@ class Database {
         statement.executeUpdate();
     }
 
+    List<String> getNames(Player player) throws SQLException {
+        PreparedStatement statement = connection.prepareStatement("SELECT `name` FROM `links` WHERE `uuid` = ? GROUP BY `name`");
+
+        statement.setString(1, player.getUniqueId().toString());
+
+        List<String> names = new ArrayList<>();
+
+        ResultSet result = statement.executeQuery();
+
+        while (result.next()) {
+            names.add(result.getString("name"));
+        }
+
+        return names;
+    }
+
     List<Location> getLocations(Player player, String name, String type) throws SQLException {
         PreparedStatement statement = connection.prepareStatement("SELECT `world`, `x`, `y`, `z` FROM `links` WHERE `uuid` = ? AND `name` = ? AND `type` = ? ORDER BY `order`");
 

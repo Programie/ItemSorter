@@ -20,6 +20,8 @@ The following options can be configured in the config.yml of the plugin (created
 
 * `allow-cross-world-connections` - Allow to connect signs between worlds (i.e. transfer items from the Nether to the Overworld) (`true` or `false`, default: `false`)
 * `max-distance` - The maximum distance between source and target chests (`0` = unlimited, default: `100`)
+* `max-names-per-player` - The maximum number of different names per player (`0` = unlimited, default: `0`)
+* `max-signs-per-name` - The maximum number of signs per name (`0` = unlimited, default: `0`)
 
 ## Permissions
 

@@ -3,3 +3,9 @@ allow-cross-world-connections: false
 
 # Maximum distance between source and target chests (0 = unlimited)
 max-distance: 100
+
+# Maximum number of different names per player (0 = unlimited)
+max-names-per-player: 0
+
+# Maximum number of signs per name (0 = unlimited)
+max-signs-per-name: 0

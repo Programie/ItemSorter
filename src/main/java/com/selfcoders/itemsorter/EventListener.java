@@ -22,12 +22,16 @@ public class EventListener implements Listener {
     private final InventoryHelper inventoryHelper;
     private final boolean allowCrossWorldConnections;
     private final int maxDistance;
+    private final int maxNamesPerPlayer;
+    private final int maxSignsPerName;
 
-    public EventListener(ItemSorter plugin, InventoryHelper inventoryHelper, boolean allowCrossWorldConnections, int maxDistance) {
+    public EventListener(ItemSorter plugin, InventoryHelper inventoryHelper, boolean allowCrossWorldConnections, int maxDistance, int maxNamesPerPlayer, int maxSignsPerName) {
         this.plugin = plugin;
         this.inventoryHelper = inventoryHelper;
         this.allowCrossWorldConnections = allowCrossWorldConnections;
         this.maxDistance = maxDistance;
+        this.maxNamesPerPlayer = maxNamesPerPlayer;
+        this.maxSignsPerName = maxSignsPerName;
     }
 
     @EventHandler
@@ -93,6 +97,48 @@ public class EventListener implements Listener {
         }
 
         Location signLocation = block.getLocation();
+
+        if (maxNamesPerPlayer > 0) {
+            try {
+                List<String> usedNames = plugin.getDatabase().getNames(player);
+
+                int usedNamesCount = 0;
+                for (String usedName : usedNames) {
+                    if (usedName.equalsIgnoreCase(signData.name)) {
+                        continue;
+                    }
+
+                    usedNamesCount++;
+                }
+
+                if (usedNamesCount >= maxNamesPerPlayer) {
+                    player.sendMessage(ChatColor.RED + "You've reached the maximum number of different sign names (" + maxNamesPerPlayer + ")!");
+                    block.breakNaturally();
+                    return;
+                }
+            } catch (SQLException exception) {
+                plugin.getLogger().severe("Unable to count names in database: " + exception.getMessage());
+                player.sendMessage(ChatColor.RED + "An error occurred while adding the sign!");
+                block.breakNaturally();
+                return;
+            }
+        }
+
+        if (maxSignsPerName > 0) {
+            try {
+                int usedSigns = plugin.getDatabase().getLocations(player, signData.name).size();
+                if (usedSigns >= maxSignsPerName) {
+                    player.sendMessage(ChatColor.RED + "You've reached the maximum number of signs for '" + signData.name + "' (" + maxSignsPerName + ")!");
+                    block.breakNaturally();
+                    return;
+                }
+            } catch (SQLException exception) {
+                plugin.getLogger().severe("Unable to count signs in database: " + exception.getMessage());
+                player.sendMessage(ChatColor.RED + "An error occurred while adding the sign!");
+                block.breakNaturally();
+                return;
+            }
+        }
 
         try {
             plugin.getDatabase().addLocation(player, signData.name, type, signLocation, signData.order);
