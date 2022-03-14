@@ -44,6 +44,10 @@ class Database {
         statement.execute(statementString);
     }
 
+    void close() throws SQLException {
+        connection.close();
+    }
+
     void addLocation(Player player, String name, String type, Location location, int order) throws SQLException {
         PreparedStatement statement = connection.prepareStatement("INSERT INTO `links` (`uuid`, `player`, `name`, `type`, `order`, `world`, `x`, `y`, `z`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
 

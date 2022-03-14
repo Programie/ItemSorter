@@ -30,6 +30,15 @@ public class ItemSorter extends JavaPlugin {
         pluginManager.registerEvents(new EventListener(this, inventoryHelper, allowCrossWorldConnections, maxDistance), this);
     }
 
+    @Override
+    public void onDisable() {
+        try {
+            database.close();
+        } catch (Exception exception) {
+            getLogger().severe("Error while closing the database: " + exception.getMessage());
+        }
+    }
+
     Database getDatabase() {
         return database;
     }
