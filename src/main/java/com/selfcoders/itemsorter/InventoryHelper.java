@@ -7,10 +7,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class InventoryHelper {
     private final boolean allowCrossWorldConnections;
@@ -40,8 +37,8 @@ public class InventoryHelper {
         return inventories;
     }
 
-    List<Inventory> getInventoriesForType(List<Location> signLocations, Material type) {
-        List<Inventory> inventories = new ArrayList<>();
+    Map<Material, List<Inventory>> getInventoriesForPerType(List<Location> signLocations) {
+        Map<Material, List<Inventory>> inventories = new HashMap<>();
 
         for (Location signLocation : signLocations) {
             Block signBlock = signLocation.getBlock();
@@ -80,10 +77,7 @@ public class InventoryHelper {
                         continue;
                     }
 
-                    if (stack.getType() == type) {
-                        inventories.add(blockInventory);
-                        break;
-                    }
+                    inventories.computeIfAbsent(stack.getType(), key -> new ArrayList<>()).add(blockInventory);
                 }
             }
         }
@@ -106,17 +100,19 @@ public class InventoryHelper {
     }
 
     void moveInventoryContentsToTargets(Inventory inventory, List<Location> targetSignLocations) {
+        Map<Material, List<Inventory>> targetInventories = getInventoriesForPerType(targetSignLocations);
+
         for (ItemStack stack : inventory.getContents()) {
             if (stack == null) {
                 continue;
             }
 
-            List<Inventory> targetInventories = getInventoriesForType(targetSignLocations, stack.getType());
-            if (targetInventories.isEmpty()) {
+            List<Inventory> targetInventoriesForType = targetInventories.get(stack.getType());
+            if (targetInventoriesForType == null) {
                 continue;
             }
 
-            moveStackToInventories(stack.clone(), inventory, targetInventories);
+            moveStackToInventories(stack.clone(), inventory, targetInventoriesForType);
         }
     }
 
