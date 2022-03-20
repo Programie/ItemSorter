@@ -28,6 +28,10 @@ public class SignHelper {
      * @return Sign or null
      */
     static Sign getSignAttachedToBlock(Block block) {
+        if (!BlockHelper.isChunkLoaded(block)) {
+            return null;
+        }
+
         for (BlockFace blockFace : BLOCK_FACES) {
             Block faceBlock = block.getRelative(blockFace);
             Material faceBlockType = faceBlock.getType();
@@ -60,6 +64,10 @@ public class SignHelper {
      * @return Sign or null
      */
     static Sign getSignFromBlock(Block block) {
+        if (!BlockHelper.isChunkLoaded(block)) {
+            return null;
+        }
+
         BlockData blockData = block.getBlockData();
 
         if (!(blockData instanceof WallSign) && !(blockData instanceof org.bukkit.block.data.type.Sign)) {
@@ -88,6 +96,10 @@ public class SignHelper {
      * @return The block the sign is attached to or null if the sign block is not a wall sign
      */
     static Block getBlockFromSign(Block signBlock) {
+        if (!BlockHelper.isChunkLoaded(signBlock)) {
+            return null;
+        }
+
         BlockData blockData = signBlock.getBlockData();
 
         if (!(blockData instanceof WallSign)) {

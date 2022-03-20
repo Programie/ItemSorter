@@ -41,4 +41,8 @@ public class BlockHelper {
 
         return set;
     }
+
+    public static boolean isChunkLoaded(Block block) {
+        return block.getWorld().isChunkLoaded(block.getX() / 16, block.getZ() / 16);
+    }
 }
