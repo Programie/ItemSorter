@@ -8,6 +8,7 @@ public class SignData {
     String name;
     String player;
     Integer order = 0;
+    Boolean multiChests = false;
 
     SignData(String[] lines) {
         if (lines.length >= 1) {
@@ -39,6 +40,9 @@ public class SignData {
                         } catch (Exception exception) {
                             // ignore
                         }
+                        break;
+                    case "mc":// Multi chests
+                        multiChests = true;
                         break;
                 }
             }

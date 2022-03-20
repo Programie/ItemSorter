@@ -22,6 +22,8 @@ The following options can be configured in the config.yml of the plugin (created
 * `max-distance` - The maximum distance between source and target chests (`0` = unlimited, default: `100`)
 * `max-names-per-player` - The maximum number of different names per player (`0` = unlimited, default: `0`)
 * `max-signs-per-name` - The maximum number of signs per name (`0` = unlimited, default: `0`)
+* `allow-multi-chests` - Allow multiple chests connected to a single target sign (default: `true`)
+* `max-multi-chests-blocks` - The maximum number of chest blocks used for the multi chest feature (`0` = unlimited, default: `0`)
 
 ## Permissions
 
@@ -67,6 +69,30 @@ Example:
 A lower number means the chest is used before another with a higher number. By default, any target chest without the order option will have the order number `0`.
 
 If you define multiple chests with the same order number, the order of those chests might be random.
+
+### Multiple chests with a single target sign
+
+Sometimes, you might get at the point where placing lots of signs is really time-consuming and could also decrease the client rendering performance (i.e. if there are hundreds of signs in your storage room).
+
+In that case, you can use another feature build into this plugin. Simply place a single target sign at any chest and add `mc` (short for "Multi Chests") to the fourth line of it. Any directly connected chests are now connected equally with this target sign.
+
+Example:
+
+* First line: `[ItemTarget]`
+* Second line: Any unique name used by the other connected chests
+* Third line: Keep empty (will be replaced with your player name)
+* Fourth line: `mc`
+
+You may also specify other options like the target order by separating each option with a comma.
+
+Example:
+
+* First line: `[ItemTarget]`
+* Second line: Any unique name used by the other connected chests
+* Third line: Keep empty (will be replaced with your player name)
+* Fourth line: `o:10,mc`
+
+Placing that sign on a chest allows you to connect as many chests as you want (limited by the `max-multi-chests-blocks` config option). You only have to make sure, they are touching each other on any block side.
 
 ### Show info about sign
 

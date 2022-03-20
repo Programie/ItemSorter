@@ -2,10 +2,7 @@ package com.selfcoders.itemsorter;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.Container;
-import org.bukkit.block.DoubleChest;
+import org.bukkit.block.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -13,14 +10,19 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class InventoryHelper {
     private final boolean allowCrossWorldConnections;
     private final int maxDistance;
+    private final boolean allowMultiChests;
+    private final int maxMultiChestsBlocks;
 
-    InventoryHelper(boolean allowCrossWorldConnections, int maxDistance) {
+    InventoryHelper(boolean allowCrossWorldConnections, int maxDistance, boolean allowMultiChests, int maxMultiChestsBlocks) {
         this.allowCrossWorldConnections = allowCrossWorldConnections;
         this.maxDistance = maxDistance;
+        this.allowMultiChests = allowMultiChests;
+        this.maxMultiChestsBlocks = maxMultiChestsBlocks;
     }
 
     List<Inventory> getInventories(List<Location> locations) {
@@ -38,23 +40,50 @@ public class InventoryHelper {
         return inventories;
     }
 
-    List<Inventory> getInventoriesForType(List<Location> locations, Material type) {
+    List<Inventory> getInventoriesForType(List<Location> signLocations, Material type) {
         List<Inventory> inventories = new ArrayList<>();
 
-        for (Location location : locations) {
-            Inventory inventory = getInventoryForLocation(location);
+        for (Location signLocation : signLocations) {
+            Block signBlock = signLocation.getBlock();
+
+            Sign sign = SignHelper.getSignFromBlock(signBlock);
+            if (sign == null) {
+                continue;
+            }
+
+            Block attachedToBlock = SignHelper.getBlockFromSign(signBlock);
+            if (attachedToBlock == null) {
+                continue;
+            }
+
+            Inventory inventory = getInventoryForBlock(attachedToBlock);
             if (inventory == null) {
                 continue;
             }
 
-            for (ItemStack stack : inventory.getContents()) {
-                if (stack == null) {
-                    continue;
-                }
+            List<Inventory> blockInventories = new ArrayList<>();
+            blockInventories.add(inventory);
 
-                if (stack.getType() == type) {
-                    inventories.add(inventory);
-                    break;
+            if (allowMultiChests) {
+                SignData signData = new SignData(sign);
+                if (signData.multiChests) {
+                    List<Inventory> connectedInventories = getConnectedInventories(inventory);
+                    if (connectedInventories != null) {
+                        blockInventories.addAll(connectedInventories);
+                    }
+                }
+            }
+
+            for (Inventory blockInventory : blockInventories) {
+                for (ItemStack stack : blockInventory.getContents()) {
+                    if (stack == null) {
+                        continue;
+                    }
+
+                    if (stack.getType() == type) {
+                        inventories.add(blockInventory);
+                        break;
+                    }
                 }
             }
         }
@@ -62,15 +91,8 @@ public class InventoryHelper {
         return inventories;
     }
 
-    Inventory getInventoryForLocation(Location location) {
-        Block signBlock = location.getBlock();
-
-        Block attachedToBlock = SignHelper.getBlockFromSign(signBlock);
-        if (attachedToBlock == null) {
-            return null;
-        }
-
-        BlockState blockState = attachedToBlock.getState();
+    Inventory getInventoryForBlock(Block block) {
+        BlockState blockState = block.getState();
         if (!(blockState instanceof Container)) {
             return null;
         }
@@ -79,13 +101,17 @@ public class InventoryHelper {
         return container.getInventory();
     }
 
-    void moveInventoryContentsToTargets(Inventory inventory, List<Location> targets) {
+    Inventory getInventoryForLocation(Location location) {
+        return getInventoryForBlock(location.getBlock());
+    }
+
+    void moveInventoryContentsToTargets(Inventory inventory, List<Location> targetSignLocations) {
         for (ItemStack stack : inventory.getContents()) {
             if (stack == null) {
                 continue;
             }
 
-            List<Inventory> targetInventories = getInventoriesForType(targets, stack.getType());
+            List<Inventory> targetInventories = getInventoriesForType(targetSignLocations, stack.getType());
             if (targetInventories.isEmpty()) {
                 continue;
             }
@@ -168,5 +194,43 @@ public class InventoryHelper {
         }
 
         return null;
+    }
+
+    List<Inventory> getConnectedInventories(Inventory inventory) {
+        InventoryHolder inventoryHolder = inventory.getHolder();
+
+        if (inventoryHolder instanceof Container) {
+            return getConnectedInventories((Container) inventoryHolder);
+        }
+
+        // Double chests are a bit special...
+        if (inventoryHolder instanceof DoubleChest) {
+            InventoryHolder leftSide = ((DoubleChest) inventoryHolder).getLeftSide();
+            if (leftSide instanceof Container) {
+                return getConnectedInventories((Container) leftSide);
+            }
+
+            InventoryHolder rightSide = ((DoubleChest) inventoryHolder).getRightSide();
+            if (rightSide instanceof Container) {
+                return getConnectedInventories((Container) rightSide);
+            }
+        }
+
+        return null;
+    }
+
+    List<Inventory> getConnectedInventories(Container container) {
+        List<Inventory> connectedInventories = new ArrayList<>();
+        Set<Block> connectedBlocks = BlockHelper.getConnectedBlocks(container.getBlock(), maxMultiChestsBlocks);
+
+        for (Block block : connectedBlocks) {
+            BlockState blockState = block.getState();
+
+            if (blockState instanceof Container) {
+                connectedInventories.add(((Container) blockState).getInventory());
+            }
+        }
+
+        return connectedInventories;
     }
 }

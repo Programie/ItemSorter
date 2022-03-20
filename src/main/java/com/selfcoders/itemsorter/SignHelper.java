@@ -1,6 +1,7 @@
 package com.selfcoders.itemsorter;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.*;
@@ -9,6 +10,7 @@ import org.bukkit.block.data.type.WallSign;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -94,6 +96,27 @@ public class SignHelper {
 
         WallSign sign = (WallSign) blockData;
         return signBlock.getRelative(sign.getFacing().getOppositeFace());
+    }
+
+    /**
+     * Translate a list of locations of signs to their attached block locations.
+     *
+     * @param signLocations A list of locations of the signs
+     * @return A list of locations of the blocks the signs are attached to
+     */
+    static List<Location> getBlockLocationsFromSignLocations(List<Location> signLocations) {
+        List<Location> blockLocations = new ArrayList<>();
+
+        for (Location signLocation : signLocations) {
+            Block block = getBlockFromSign(signLocation.getBlock());
+            if (block == null) {
+                continue;
+            }
+
+            blockLocations.add(block.getLocation());
+        }
+
+        return blockLocations;
     }
 
     static SignData getSignDataForContainer(Container container) {

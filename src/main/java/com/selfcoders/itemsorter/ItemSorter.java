@@ -19,6 +19,8 @@ public class ItemSorter extends JavaPlugin {
         int maxDistance = config.getInt("max-distance", 100);
         int maxNamesPerPlayer = config.getInt("max-names-per-player", 0);
         int maxSignsPerName = config.getInt("max-signs-per-name", 0);
+        boolean allowMultiChests = config.getBoolean("allow-multi-chests", true);
+        int maxMultiChestsBlocks = config.getInt("max-multi-chests-blocks", 0);
 
         try {
             database = new Database(this);
@@ -28,7 +30,7 @@ public class ItemSorter extends JavaPlugin {
             return;
         }
 
-        InventoryHelper inventoryHelper = new InventoryHelper(allowCrossWorldConnections, maxDistance);
+        InventoryHelper inventoryHelper = new InventoryHelper(allowCrossWorldConnections, maxDistance, allowMultiChests, maxMultiChestsBlocks);
         pluginManager.registerEvents(new EventListener(this, inventoryHelper, allowCrossWorldConnections, maxDistance, maxNamesPerPlayer, maxSignsPerName), this);
     }
 

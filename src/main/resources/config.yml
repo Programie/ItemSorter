@@ -9,3 +9,9 @@ max-names-per-player: 0
 
 # Maximum number of signs per name (0 = unlimited)
 max-signs-per-name: 0
+
+# Whether to allow multiple connected chests per sign (i.e. a 4 x 4 field of barrels where only one of them has a sign)
+allow-multi-chests: true
+
+# The maximum number of chest blocks used for the multi chest feature (0 = unlimited)
+max-multi-chests-blocks: 0

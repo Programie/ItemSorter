@@ -346,7 +346,7 @@ public class EventListener implements Listener {
         List<Location> targetLocations;
 
         try {
-            sourceLocations = plugin.getDatabase().getLocations(signData.player, signData.name, SignHelper.TYPE_SOURCE);
+            sourceLocations = SignHelper.getBlockLocationsFromSignLocations(plugin.getDatabase().getLocations(signData.player, signData.name, SignHelper.TYPE_SOURCE));
             targetLocations = plugin.getDatabase().getLocations(signData.player, signData.name, SignHelper.TYPE_TARGET);
         } catch (SQLException exception) {
             plugin.getLogger().severe("Unable to get locations from database: " + exception.getMessage());
