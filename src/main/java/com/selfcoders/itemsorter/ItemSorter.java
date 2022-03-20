@@ -15,10 +15,10 @@ public class ItemSorter extends JavaPlugin {
 
         FileConfiguration config = getConfig();
 
-        boolean allowCrossWorldConnections = config.getBoolean("allow-cross-world-connections");
-        int maxDistance = config.getInt("max-distance");
-        int maxNamesPerPlayer = config.getInt("max-names-per-player");
-        int maxSignsPerName = config.getInt("max-signs-per-name");
+        boolean allowCrossWorldConnections = config.getBoolean("allow-cross-world-connections", false);
+        int maxDistance = config.getInt("max-distance", 100);
+        int maxNamesPerPlayer = config.getInt("max-names-per-player", 0);
+        int maxSignsPerName = config.getInt("max-signs-per-name", 0);
 
         try {
             database = new Database(this);
