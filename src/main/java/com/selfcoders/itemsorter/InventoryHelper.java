@@ -10,12 +10,14 @@ import org.bukkit.inventory.ItemStack;
 import java.util.*;
 
 public class InventoryHelper {
+    private final ItemSorter plugin;
     private final boolean allowCrossWorldConnections;
     private final int maxDistance;
     private final boolean allowMultiChests;
     private final int maxMultiChestsBlocks;
 
-    InventoryHelper(boolean allowCrossWorldConnections, int maxDistance, boolean allowMultiChests, int maxMultiChestsBlocks) {
+    InventoryHelper(ItemSorter plugin, boolean allowCrossWorldConnections, int maxDistance, boolean allowMultiChests, int maxMultiChestsBlocks) {
+        this.plugin = plugin;
         this.allowCrossWorldConnections = allowCrossWorldConnections;
         this.maxDistance = maxDistance;
         this.allowMultiChests = allowMultiChests;
@@ -100,6 +102,13 @@ public class InventoryHelper {
     }
 
     void moveInventoryContentsToTargets(Inventory inventory, List<Location> targetSignLocations) {
+        Container sourceContainer = getContainerFromInventory(inventory);
+        if (sourceContainer == null) {
+            return;
+        }
+
+        Location sourceLocation = sourceContainer.getLocation();
+
         Map<Material, List<Inventory>> targetInventories = getInventoriesForPerType(targetSignLocations);
 
         for (ItemStack stack : inventory.getContents()) {
@@ -112,20 +121,40 @@ public class InventoryHelper {
                 continue;
             }
 
-            moveStackToInventories(stack.clone(), inventory, targetInventoriesForType);
+            targetInventoriesForType = filterInventoriesByDistance(sourceLocation, targetInventoriesForType);
+
+            plugin.addItemTransfer(stack, inventory, targetInventoriesForType);
         }
     }
 
-    void moveStackToInventories(ItemStack itemStack, Inventory sourceInventory, List<Inventory> targetInventories) {
-        int movedItems = 0;
+    boolean moveItemToInventories(ItemStack itemStack, Inventory sourceInventory, List<Inventory> targetInventories) {
+        ItemStack addStack = itemStack.clone();
 
-        Container sourceContainer = getContainerFromInventory(sourceInventory);
-        if (sourceContainer == null) {
-            return;
+        // Only move a single item at once
+        addStack.setAmount(1);
+
+        // Clone item stack as it might be modified by Inventory.addItem()
+        ItemStack removeStack = addStack.clone();
+
+        for (Inventory targetInventory : targetInventories) {
+            if (targetInventory.getHolder() == null) {
+                continue;
+            }
+
+            Map<Integer, ItemStack> remainingItems = targetInventory.addItem(addStack);
+
+            // Item moved successfully?
+            if (remainingItems.isEmpty() || remainingItems.get(0).getAmount() == 0) {
+                sourceInventory.removeItem(removeStack);
+                return true;
+            }
         }
-        Location sourceLocation = sourceContainer.getLocation();
 
-        ItemStack removeStack = itemStack.clone();
+        return false;
+    }
+
+    List<Inventory> filterInventoriesByDistance(Location sourceLocation, List<Inventory> targetInventories) {
+        List<Inventory> inventories = new ArrayList<>();
 
         for (Inventory targetInventory : targetInventories) {
             Container targetContainer = getContainerFromInventory(targetInventory);
@@ -146,27 +175,10 @@ public class InventoryHelper {
                 }
             }
 
-            int amount = itemStack.getAmount();
-            int remainingAmount = 0;
-
-            Map<Integer, ItemStack> remainingItems = targetInventory.addItem(itemStack);
-
-            if (!remainingItems.isEmpty()) {
-                itemStack = remainingItems.get(0);
-                remainingAmount = itemStack.getAmount();
-            }
-
-            movedItems += (amount - remainingAmount);
-
-            if (remainingAmount == 0) {
-                break;
-            }
+            inventories.add(targetInventory);
         }
 
-        if (movedItems > 0) {
-            removeStack.setAmount(movedItems);
-            sourceInventory.removeItem(removeStack);
-        }
+        return inventories;
     }
 
     Container getContainerFromInventory(Inventory inventory) {
