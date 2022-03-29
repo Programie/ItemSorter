@@ -1,16 +1,20 @@
 package com.selfcoders.itemsorter;
 
+import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ItemSorter extends JavaPlugin {
     private Database database;
     private ItemTransferTask itemTransferTask;
+    private Set<Location> signLocations;
 
     @Override
     public void onEnable() {
@@ -36,11 +40,28 @@ public class ItemSorter extends JavaPlugin {
             return;
         }
 
+        signLocations = new HashSet<>();
+
+        try {
+            signLocations.addAll(getDatabase().getLocations());
+        } catch (Exception exception) {
+            getLogger().severe("Unable to load sign locations from database: " + exception.getMessage());
+            pluginManager.disablePlugin(this);
+            return;
+        }
+
         InventoryHelper inventoryHelper = new InventoryHelper(this, allowCrossWorldConnections, maxDistance, allowMultiChests, maxMultiChestsBlocks);
         pluginManager.registerEvents(new EventListener(this, inventoryHelper, allowCrossWorldConnections, maxDistance, maxNamesPerPlayer, maxSignsPerName), this);
 
         itemTransferTask = new ItemTransferTask(inventoryHelper);
         getServer().getScheduler().scheduleSyncRepeatingTask(this, itemTransferTask, 0, transferInterval);
+
+        for (Location location : signLocations) {
+            Inventory inventory = SignHelper.getInventoryFromSignLocation(location);
+            if (inventory != null) {
+                inventoryHelper.updateInventory(inventory);
+            }
+        }
     }
 
     @Override
@@ -54,6 +75,18 @@ public class ItemSorter extends JavaPlugin {
 
     Database getDatabase() {
         return database;
+    }
+
+    Set<Location> getSignLocations() {
+        return signLocations;
+    }
+
+    void addSignLocation(Location location) {
+        signLocations.add(location);
+    }
+
+    void removeSignLocation(Location location) {
+        signLocations.remove(location);
     }
 
     void addItemTransfer(ItemStack itemStack, Inventory sourceInventory, List<Inventory> targetInventories) {

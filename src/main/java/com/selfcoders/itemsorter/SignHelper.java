@@ -111,6 +111,21 @@ public class SignHelper {
     }
 
     /**
+     * Get the inventory of the chest the sign at the given location is attached to.
+     *
+     * @param location The location of the sign
+     * @return The inventory of the chest or null if the sign is not attached to a chest
+     */
+    static Inventory getInventoryFromSignLocation(Location location) {
+        Block attachedToBlock = getBlockFromSign(location.getBlock());
+        if (attachedToBlock == null) {
+            return null;
+        }
+
+        return InventoryHelper.getInventoryForBlock(attachedToBlock);
+    }
+
+    /**
      * Translate a list of locations of signs to their attached block locations.
      *
      * @param signLocations A list of locations of the signs

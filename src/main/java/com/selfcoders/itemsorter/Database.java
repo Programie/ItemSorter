@@ -123,6 +123,12 @@ class Database {
         return getLocations(statement);
     }
 
+    List<Location> getLocations() throws SQLException {
+        PreparedStatement statement = connection.prepareStatement("SELECT `world`, `x`, `y`, `z` FROM `links`");
+
+        return getLocations(statement);
+    }
+
     List<Location> getLocations(PreparedStatement statement) throws SQLException {
         List<Location> locations = new ArrayList<>();
 

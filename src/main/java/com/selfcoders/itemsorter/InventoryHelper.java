@@ -7,6 +7,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
+import java.sql.SQLException;
 import java.util.*;
 
 public class InventoryHelper {
@@ -87,7 +88,7 @@ public class InventoryHelper {
         return inventories;
     }
 
-    Inventory getInventoryForBlock(Block block) {
+    static Inventory getInventoryForBlock(Block block) {
         BlockState blockState = block.getState();
         if (!(blockState instanceof Container)) {
             return null;
@@ -97,7 +98,7 @@ public class InventoryHelper {
         return container.getInventory();
     }
 
-    Inventory getInventoryForLocation(Location location) {
+    static Inventory getInventoryForLocation(Location location) {
         return getInventoryForBlock(location.getBlock());
     }
 
@@ -240,5 +241,50 @@ public class InventoryHelper {
         }
 
         return connectedInventories;
+    }
+
+    void updateInventoryForSource(SignData signData, Inventory inventory) {
+        List<Location> targetLocations;
+
+        try {
+            targetLocations = plugin.getDatabase().getLocations(signData.player, signData.name, SignHelper.TYPE_TARGET);
+        } catch (SQLException exception) {
+            plugin.getLogger().severe("Unable to get locations from database: " + exception.getMessage());
+            return;
+        }
+
+        moveInventoryContentsToTargets(inventory, targetLocations);
+    }
+
+    void updateInventoryForTarget(SignData signData) {
+        List<Location> sourceLocations;
+        List<Location> targetLocations;
+
+        try {
+            sourceLocations = SignHelper.getBlockLocationsFromSignLocations(plugin.getDatabase().getLocations(signData.player, signData.name, SignHelper.TYPE_SOURCE));
+            targetLocations = plugin.getDatabase().getLocations(signData.player, signData.name, SignHelper.TYPE_TARGET);
+        } catch (SQLException exception) {
+            plugin.getLogger().severe("Unable to get locations from database: " + exception.getMessage());
+            return;
+        }
+
+        List<Inventory> inventories = getInventories(sourceLocations);
+
+        for (Inventory inventory : inventories) {
+            moveInventoryContentsToTargets(inventory, targetLocations);
+        }
+    }
+
+    void updateInventory(Inventory inventory) {
+        SignData signData = SignHelper.getSignDataForInventory(inventory);
+        if (signData == null) {
+            return;
+        }
+
+        if (signData.isSource()) {
+            updateInventoryForSource(signData, inventory);
+        } else if (signData.isTarget()) {
+            updateInventoryForTarget(signData);
+        }
     }
 }
