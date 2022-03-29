@@ -7,10 +7,12 @@ import java.util.List;
 
 public class TransferItem {
     ItemStack stack;
-    List<Inventory> targetInventories;
+    Inventory source;
+    List<Inventory> targets;
 
-    TransferItem(ItemStack stack, List<Inventory> targetInventories) {
+    TransferItem(ItemStack stack, Inventory source, List<Inventory> targets) {
         this.stack = stack;
-        this.targetInventories = targetInventories;
+        this.source = source;
+        this.targets = targets;
     }
 }
