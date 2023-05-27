@@ -55,6 +55,8 @@ After that, you are ready to go. Now you may move any item from your player inve
 
 Any remaining items which can't be sorted into a target chest will remain in the source chest.
 
+I've also created a [short video](https://www.youtube.com/watch?v=1KBjjMT5_-0) demonstrating the plugin.
+
 ### Target order
 
 At some point, you might have multiple chests for a single item type like cobblestone or dirt. In that case, you may also want to define which chest should be filled up first before trying the next one.
