@@ -48,13 +48,13 @@ public class EventListener implements Listener {
 
         if (!player.hasPermission("itemsorter.create")) {
             player.sendMessage(ChatColor.RED + "You do not have the required permissions to create ItemSorter signs!");
-            block.breakNaturally();
+            event.setCancelled(true);
             return;
         }
 
         if (!(blockData instanceof WallSign)) {
             player.sendMessage(ChatColor.RED + "An ItemSorter sign must be attached to an inventory block (i.e. chest or hopper)!");
-            block.breakNaturally();
+            event.setCancelled(true);
             return;
         }
 
@@ -63,13 +63,13 @@ public class EventListener implements Listener {
         BlockState attachedToBlockState = attachedToBlock.getState();
         if (!(attachedToBlockState instanceof Container)) {
             player.sendMessage(ChatColor.RED + "An ItemSorter sign must be attached to an inventory block (i.e. chest or hopper)!");
-            block.breakNaturally();
+            event.setCancelled(true);
             return;
         }
 
         if (!signData.checkName()) {
             player.sendMessage(ChatColor.RED + "No name specified on the second line!");
-            block.breakNaturally();
+            event.setCancelled(true);
             return;
         }
 
@@ -79,7 +79,7 @@ public class EventListener implements Listener {
             event.setLine(0, ChatColor.BLUE + SignHelper.TAG_TARGET);
         } else {
             player.sendMessage(ChatColor.RED + "First line must be either [ItemSource] or [ItemTarget]!");
-            block.breakNaturally();
+            event.setCancelled(true);
             return;
         }
 
@@ -114,13 +114,13 @@ public class EventListener implements Listener {
 
                 if (usedNamesCount >= maxNamesPerPlayer) {
                     player.sendMessage(ChatColor.RED + "You've reached the maximum number of different sign names (" + maxNamesPerPlayer + ")!");
-                    block.breakNaturally();
+                    event.setCancelled(true);
                     return;
                 }
             } catch (SQLException exception) {
                 plugin.getLogger().severe("Unable to count names in database: " + exception.getMessage());
                 player.sendMessage(ChatColor.RED + "An error occurred while adding the sign!");
-                block.breakNaturally();
+                event.setCancelled(true);
                 return;
             }
         }
@@ -130,13 +130,13 @@ public class EventListener implements Listener {
                 int usedSigns = plugin.getDatabase().getLocations(player, signData.name).size();
                 if (usedSigns >= maxSignsPerName) {
                     player.sendMessage(ChatColor.RED + "You've reached the maximum number of signs for '" + signData.name + "' (" + maxSignsPerName + ")!");
-                    block.breakNaturally();
+                    event.setCancelled(true);
                     return;
                 }
             } catch (SQLException exception) {
                 plugin.getLogger().severe("Unable to count signs in database: " + exception.getMessage());
                 player.sendMessage(ChatColor.RED + "An error occurred while adding the sign!");
-                block.breakNaturally();
+                event.setCancelled(true);
                 return;
             }
         }
@@ -146,7 +146,7 @@ public class EventListener implements Listener {
         } catch (SQLException exception) {
             plugin.getLogger().severe("Unable to add location to database: " + exception.getMessage());
             player.sendMessage(ChatColor.RED + "An error occurred while adding the sign!");
-            block.breakNaturally();
+            event.setCancelled(true);
             return;
         }
 
@@ -282,6 +282,13 @@ public class EventListener implements Listener {
         SignData signData = new SignData(signBlock.getLines());
         if (!signData.isItemSorterSign()) {
             return;
+        }
+
+        // Sign should not be editable
+        // Probably better to set this while creating the sign instead of while interacting with it
+        if (!signBlock.isWaxed()) {
+            signBlock.setWaxed(true);
+            signBlock.update();
         }
 
         Location signLocation = signBlock.getLocation();

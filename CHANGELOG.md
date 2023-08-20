@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.4 (2023-08-20)
+
+* Prevent editing sign with right click implemented with Minecraft 1.20
+* Now requires at least Minecraft 1.20.1
+
 ## 1.3.1 (2022-03-29)
 
 * Automatically start item transfers once a chunk gets loaded and on plugin load for loaded chunks
