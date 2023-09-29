@@ -4,8 +4,8 @@ A Minecraft Bukkit plugin which transfers and sorts items from inventories like 
 
 ![](logo.png)
 
-[![pipeline status](https://gitlab.com/Programie/ItemSorter/badges/master/pipeline.svg)](https://gitlab.com/Programie/ItemSorter/commits/master)
-[![download from GitLab](https://img.shields.io/badge/download-Releases-blue?logo=gitlab)](https://gitlab.com/Programie/ItemSorter/-/releases)
+[![actions status](https://github.com/Programie/ItemSorter/actions/workflows/build.yml/badge.svg)](https://github.com/Programie/ItemSorter/actions/workflows/build.yml)
+[![download from GitHub](https://img.shields.io/badge/download-Releases-blue?logo=github)](https://github.com/Programie/ItemSorter/releases/latest)
 [![download from Modrinth](https://img.shields.io/badge/download-Modrinth-blue?logo=modrinth)](https://modrinth.com/plugin/itemsorter)
 [![download from CurseForge](https://img.shields.io/badge/download-CurseForge-blue?logo=curseforge)](https://www.curseforge.com/minecraft/bukkit-plugins/itemsorter)
 

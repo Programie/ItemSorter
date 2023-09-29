@@ -15,10 +15,10 @@
 
     <name>ItemSorter</name>
     <description>Transfer and sort items from inventories like chests into other inventories</description>
-    <url>https://gitlab.com/Programie/ItemSorter</url>
+    <url>https://github.com/Programie/ItemSorter</url>
 
     <scm>
-        <developerConnection>scm:git:ssh://git@gitlab.com/Programie/ItemSorter.git</developerConnection>
+        <developerConnection>scm:git:ssh://git@github.com/Programie/ItemSorter.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
