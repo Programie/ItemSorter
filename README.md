@@ -8,6 +8,7 @@ A Minecraft Bukkit plugin which transfers and sorts items from inventories like 
 [![download from GitHub](https://img.shields.io/badge/download-Releases-blue?logo=github)](https://github.com/Programie/ItemSorter/releases/latest)
 [![download from Modrinth](https://img.shields.io/badge/download-Modrinth-blue?logo=modrinth)](https://modrinth.com/plugin/itemsorter)
 [![download from CurseForge](https://img.shields.io/badge/download-CurseForge-blue?logo=curseforge)](https://www.curseforge.com/minecraft/bukkit-plugins/itemsorter)
+[![view on Website](https://img.shields.io/badge/view-Website-blue)](https://selfcoders.com/projects/itemsorter)
 
 ## What is it?
 
