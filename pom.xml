@@ -10,7 +10,7 @@
 
     <groupId>com.selfcoders</groupId>
     <artifactId>itemsorter</artifactId>
-    <version>1.5-SNAPSHOT</version>
+    <version>1.5.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>ItemSorter</name>
