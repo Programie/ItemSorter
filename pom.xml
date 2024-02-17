@@ -32,4 +32,12 @@
             <url>https://maven.pkg.github.com/Programie/Common</url>
         </repository>
     </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.selfcoders</groupId>
+            <artifactId>bukkit-library</artifactId>
+            <version>1.0.1-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 </project>

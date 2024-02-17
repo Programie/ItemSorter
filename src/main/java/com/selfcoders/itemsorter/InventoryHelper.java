@@ -1,5 +1,6 @@
 package com.selfcoders.itemsorter;
 
+import com.selfcoders.bukkitlibrary.LocationUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.*;
@@ -170,7 +171,7 @@ public class InventoryHelper {
             }
 
             if (maxDistance > 0) {
-                Integer distance = Util.getDistance(sourceLocation, targetLocation);
+                Integer distance = LocationUtils.getDistance(sourceLocation, targetLocation);
                 if (distance == null || distance > maxDistance) {
                     continue;
                 }

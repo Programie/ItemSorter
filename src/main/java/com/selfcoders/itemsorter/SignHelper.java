@@ -1,17 +1,14 @@
 package com.selfcoders.itemsorter;
 
+import com.selfcoders.bukkitlibrary.BlockUtils;
+import com.selfcoders.bukkitlibrary.SignUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Tag;
 import org.bukkit.block.*;
-import org.bukkit.block.data.BlockData;
-import org.bukkit.block.data.type.WallSign;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class SignHelper {
@@ -19,7 +16,6 @@ public class SignHelper {
     final static String TAG_TARGET = "[ItemTarget]";
     static final String TYPE_SOURCE = "source";
     static final String TYPE_TARGET = "target";
-    final static List<BlockFace> BLOCK_FACES = Arrays.asList(BlockFace.UP, BlockFace.EAST, BlockFace.NORTH, BlockFace.WEST, BlockFace.SOUTH);
 
     /**
      * Get the ItemSorter sign attached to the specified block or null if not found.
@@ -28,33 +24,17 @@ public class SignHelper {
      * @return Sign or null
      */
     static Sign getSignAttachedToBlock(Block block) {
-        if (!BlockHelper.isChunkLoaded(block)) {
+        if (!BlockUtils.isChunkLoaded(block)) {
             return null;
         }
 
-        for (BlockFace blockFace : BLOCK_FACES) {
-            Block faceBlock = block.getRelative(blockFace);
-            Material faceBlockType = faceBlock.getType();
+        List<Sign> signs = SignUtils.getSignsAttachedToBlock(block, SignHelper::checkSign);
 
-            if (!Tag.WALL_SIGNS.isTagged(faceBlockType)) {
-                continue;
-            }
-
-            Sign signBlock = (Sign) faceBlock.getState();
-            BlockFace attachedFace = ((WallSign) signBlock.getBlockData()).getFacing();
-
-            if (!blockFace.equals(attachedFace)) {
-                continue;
-            }
-
-            if (!checkSign(signBlock)) {
-                continue;
-            }
-
-            return signBlock;
+        if (signs.isEmpty()) {
+            return null;
         }
 
-        return null;
+        return signs.get(0);
     }
 
     /**
@@ -64,24 +44,11 @@ public class SignHelper {
      * @return Sign or null
      */
     static Sign getSignFromBlock(Block block) {
-        if (!BlockHelper.isChunkLoaded(block)) {
+        if (!BlockUtils.isChunkLoaded(block)) {
             return null;
         }
 
-        BlockData blockData = block.getBlockData();
-
-        if (!(blockData instanceof WallSign) && !(blockData instanceof org.bukkit.block.data.type.Sign)) {
-            return null;
-        }
-
-        BlockState blockState = block.getState();
-
-        if (!(blockState instanceof org.bukkit.block.Sign)) {
-            return null;
-        }
-
-        Sign signBlock = (Sign) blockState;
-
+        Sign signBlock = SignUtils.getSignFromBlock(block);
         if (!checkSign(signBlock)) {
             return null;
         }
@@ -96,18 +63,11 @@ public class SignHelper {
      * @return The block the sign is attached to or null if the sign block is not a wall sign
      */
     static Block getBlockFromSign(Block signBlock) {
-        if (!BlockHelper.isChunkLoaded(signBlock)) {
+        if (!BlockUtils.isChunkLoaded(signBlock)) {
             return null;
         }
 
-        BlockData blockData = signBlock.getBlockData();
-
-        if (!(blockData instanceof WallSign)) {
-            return null;
-        }
-
-        WallSign sign = (WallSign) blockData;
-        return signBlock.getRelative(sign.getFacing().getOppositeFace());
+        return SignUtils.getSignFromAttachedBlock(signBlock);
     }
 
     /**

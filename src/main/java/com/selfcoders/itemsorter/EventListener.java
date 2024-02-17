@@ -1,5 +1,6 @@
 package com.selfcoders.itemsorter;
 
+import com.selfcoders.bukkitlibrary.LocationUtils;
 import org.bukkit.*;
 import org.bukkit.block.*;
 import org.bukkit.block.data.BlockData;
@@ -160,7 +161,7 @@ public class EventListener implements Listener {
             int totalLocations = otherLocations.size();
 
             for (Location otherLocation : otherLocations) {
-                Integer distance = Util.getDistance(signLocation, otherLocation);
+                Integer distance = LocationUtils.getDistance(signLocation, otherLocation);
 
                 if (allowCrossWorldConnections && distance == null) {
                     reachableLocations++;
@@ -361,7 +362,7 @@ public class EventListener implements Listener {
 
     private void addMessageForLocations(List<String> messages, Location signLocation, List<Location> locations) {
         for (Location location : locations) {
-            Integer distance = Util.getDistance(signLocation, location);
+            Integer distance = LocationUtils.getDistance(signLocation, location);
 
             if (allowCrossWorldConnections && distance == null) {
                 continue;
