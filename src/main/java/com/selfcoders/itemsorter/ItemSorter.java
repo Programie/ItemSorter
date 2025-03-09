@@ -30,6 +30,7 @@ public class ItemSorter extends JavaPlugin {
         int maxSignsPerName = config.getInt("max-signs-per-name", 0);
         boolean allowMultiChests = config.getBoolean("allow-multi-chests", true);
         int maxMultiChestsBlocks = config.getInt("max-multi-chests-blocks", 0);
+        boolean allowPersistentItems = config.getBoolean("allow-persistent-items", true);
         int transferInterval = config.getInt("transfer-interval", 10);
 
         try {
@@ -50,7 +51,7 @@ public class ItemSorter extends JavaPlugin {
             return;
         }
 
-        InventoryHelper inventoryHelper = new InventoryHelper(this, allowCrossWorldConnections, maxDistance, allowMultiChests, maxMultiChestsBlocks);
+        InventoryHelper inventoryHelper = new InventoryHelper(this, allowCrossWorldConnections, maxDistance, allowMultiChests, maxMultiChestsBlocks, allowPersistentItems);
         pluginManager.registerEvents(new EventListener(this, inventoryHelper, allowCrossWorldConnections, maxDistance, maxNamesPerPlayer, maxSignsPerName), this);
 
         itemTransferTask = new ItemTransferTask(inventoryHelper);

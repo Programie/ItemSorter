@@ -1,7 +1,9 @@
 package com.selfcoders.itemsorter;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -50,6 +52,18 @@ class Database {
         executeMigration("Create uuid index for links table", "CREATE INDEX `uuid` ON `links` (`uuid`)");
         executeMigration("Create nameType index for links table", "CREATE INDEX `nameType` ON `links` (`name`, `type`)");
         executeMigration("Create order index for links table", "CREATE INDEX `order` ON `links` (`order`)");
+
+        executeMigration("Create persistentItems table", "CREATE TABLE IF NOT EXISTS `persistentItems`\n" +
+                "(\n" +
+                "    `id`       INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,\n" +
+                "    `world`    TEXT,\n" +
+                "    `x`        INTEGER,\n" +
+                "    `y`        INTEGER,\n" +
+                "    `z`        INTEGER,\n" +
+                "    `itemType` TEXT\n" +
+                ")");
+
+        executeMigration("Create item index for persistentItems table", "CREATE UNIQUE INDEX `item` ON `persistentItems` (`world`, `x`, `y`, `z`, `itemType`)");
     }
 
     private int getVersion() throws SQLException {
@@ -173,5 +187,61 @@ class Database {
         }
 
         return locations;
+    }
+
+    boolean hasPersistentItem(Location location, ItemStack item) throws SQLException {
+        PreparedStatement statement = connection.prepareStatement("SELECT `id` FROM `persistentItems` WHERE `world` = ? AND `x` = ? AND `y` = ? AND `z` = ? AND `itemType` = ?");
+
+        statement.setString(1, location.getWorld().getName());
+        statement.setInt(2, (int) location.getX());
+        statement.setInt(3, (int) location.getY());
+        statement.setInt(4, (int) location.getZ());
+        statement.setString(5, item.getType().name());
+
+        ResultSet result = statement.executeQuery();
+        return result.next();
+    }
+
+    List<ItemStack> getPersistentItems(Location location) throws SQLException {
+        PreparedStatement statement = connection.prepareStatement("SELECT `itemType` FROM `persistentItems` WHERE `world` = ? AND `x` = ? AND `y` = ? AND `z` = ?");
+
+        statement.setString(1, location.getWorld().getName());
+        statement.setInt(2, (int) location.getX());
+        statement.setInt(3, (int) location.getY());
+        statement.setInt(4, (int) location.getZ());
+
+        ResultSet result = statement.executeQuery();
+
+        List<ItemStack> items = new ArrayList<>();
+
+        while (result.next()) {
+            items.add(new ItemStack(Material.valueOf(result.getString("itemType"))));
+        }
+
+        return items;
+    }
+
+    void addPersistentItem(Location location, ItemStack item) throws SQLException {
+        PreparedStatement statement = connection.prepareStatement("INSERT INTO `persistentItems` (`world`, `x`, `y`, `z`, `itemType`) VALUES (?, ?, ?, ?, ?)");
+
+        statement.setString(1, location.getWorld().getName());
+        statement.setInt(2, (int) location.getX());
+        statement.setInt(3, (int) location.getY());
+        statement.setInt(4, (int) location.getZ());
+        statement.setString(5, item.getType().name());
+
+        statement.executeUpdate();
+    }
+
+    void removePersistentItem(Location location, ItemStack item) throws SQLException {
+        PreparedStatement statement = connection.prepareStatement("DELETE FROM `persistentItems` WHERE `world` = ? AND `x` = ? AND `y` = ? AND `z` = ? AND `itemType` = ?");
+
+        statement.setString(1, location.getWorld().getName());
+        statement.setInt(2, (int) location.getX());
+        statement.setInt(3, (int) location.getY());
+        statement.setInt(4, (int) location.getZ());
+        statement.setString(5, item.getType().name());
+
+        statement.executeUpdate();
     }
 }

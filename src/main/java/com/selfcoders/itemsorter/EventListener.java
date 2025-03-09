@@ -14,6 +14,7 @@ import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -356,9 +357,96 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void onInventoryClickEvent(InventoryClickEvent event) {
+        handleInventoryClickEvent(event);
         Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> inventoryHelper.updateInventory(event.getInventory()), 1L);
     }
 
+    private void handleInventoryClickEvent(InventoryClickEvent event) {
+        Player player = (Player) event.getWhoClicked();
+        Inventory inventory = event.getInventory();
+        Inventory clickedInventory = event.getClickedInventory();
+        ItemStack currentItem = event.getCurrentItem();
+        ItemStack cursor = event.getCursor();
+        SignData signData;
+
+        switch (event.getAction()) {
+            case NOTHING:
+                break;
+            case PICKUP_ALL:
+            case PICKUP_SOME:
+            case PICKUP_HALF:
+            case PICKUP_ONE:
+                signData = inventoryHelper.getSignDataFromAllInventories(clickedInventory);
+                if (signData != null && signData.persistent && currentItem != null && !currentItem.getType().isAir()) {
+                    removePersistentItem(clickedInventory, currentItem, player);
+                }
+                break;
+            case PLACE_ALL:
+            case PLACE_SOME:
+            case PLACE_ONE:
+                signData = inventoryHelper.getSignDataFromAllInventories(clickedInventory);
+                if (signData != null && signData.persistent && cursor != null && !cursor.getType().isAir()) {
+                    addPersistentItem(clickedInventory, cursor, player);
+                }
+                break;
+            case MOVE_TO_OTHER_INVENTORY:
+                signData = inventoryHelper.getSignDataFromAllInventories(clickedInventory);
+                if (signData != null && signData.persistent && currentItem != null && !currentItem.getType().isAir()) {
+                    removePersistentItem(clickedInventory, currentItem, player);
+                    break;
+                }
+
+                signData = inventoryHelper.getSignDataFromAllInventories(inventory);
+                if (signData != null && signData.persistent && currentItem != null && !currentItem.getType().isAir()) {
+                    addPersistentItem(inventory, currentItem, player);
+                }
+
+                break;
+            default:
+                System.out.println("Unhandled event: " + event.getAction());
+                break;
+        }
+    }
+
+    private void addPersistentItem(Inventory inventory, ItemStack item, Player player) {
+        try {
+            if (plugin.getDatabase().hasPersistentItem(inventory.getLocation(), item)) {
+                return;
+            }
+        } catch (SQLException exception) {
+            plugin.getLogger().severe("Unable to check for persistent item: " + exception.getMessage());
+            return;
+        }
+
+        try {
+            plugin.getDatabase().addPersistentItem(inventory.getLocation(), item);
+
+            player.sendMessage(ChatColor.GREEN + item.getType().name() + " added to persistent items");
+        } catch (SQLException exception) {
+            plugin.getLogger().severe("Unable to add persistent item: " + exception.getMessage());
+            player.sendMessage(ChatColor.RED + "An error occurred while adding the persistent item!");
+        }
+    }
+
+    private void removePersistentItem(Inventory inventory, ItemStack item, Player player) {
+        try {
+            if (!plugin.getDatabase().hasPersistentItem(inventory.getLocation(), item)) {
+                return;
+            }
+        } catch (SQLException exception) {
+            plugin.getLogger().severe("Unable to check for persistent item: " + exception.getMessage());
+            return;
+        }
+
+        try {
+            plugin.getDatabase().removePersistentItem(inventory.getLocation(), item);
+
+            player.sendMessage(ChatColor.GREEN + item.getType().name() + " removed from persistent items");
+        } catch (SQLException exception) {
+            plugin.getLogger().severe("Unable to remove persistent item: " + exception.getMessage());
+            player.sendMessage(ChatColor.RED + "An error occurred while removing the persistent item!");
+        }
+    }
 
     private void addMessageForLocations(List<String> messages, Location signLocation, List<Location> locations) {
         for (Location location : locations) {

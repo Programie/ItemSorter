@@ -17,13 +17,15 @@ public class InventoryHelper {
     private final int maxDistance;
     private final boolean allowMultiChests;
     private final int maxMultiChestsBlocks;
+    private final boolean allowPersistentItems;
 
-    InventoryHelper(ItemSorter plugin, boolean allowCrossWorldConnections, int maxDistance, boolean allowMultiChests, int maxMultiChestsBlocks) {
+    InventoryHelper(ItemSorter plugin, boolean allowCrossWorldConnections, int maxDistance, boolean allowMultiChests, int maxMultiChestsBlocks, boolean allowPersistentItems) {
         this.plugin = plugin;
         this.allowCrossWorldConnections = allowCrossWorldConnections;
         this.maxDistance = maxDistance;
         this.allowMultiChests = allowMultiChests;
         this.maxMultiChestsBlocks = maxMultiChestsBlocks;
+        this.allowPersistentItems = allowPersistentItems;
     }
 
     List<Inventory> getInventories(List<Location> locations) {
@@ -62,21 +64,36 @@ public class InventoryHelper {
                 continue;
             }
 
+            SignData signData = new SignData(sign);
+
             List<Inventory> blockInventories = new ArrayList<>();
             blockInventories.add(inventory);
 
-            if (allowMultiChests) {
-                SignData signData = new SignData(sign);
-                if (signData.multiChests) {
-                    List<Inventory> connectedInventories = getConnectedInventories(inventory);
-                    if (connectedInventories != null) {
-                        blockInventories.addAll(connectedInventories);
-                    }
+            if (allowMultiChests && signData.multiChests) {
+                List<Inventory> connectedInventories = getConnectedInventories(inventory);
+                if (connectedInventories != null) {
+                    blockInventories.addAll(connectedInventories);
                 }
             }
 
             for (Inventory blockInventory : blockInventories) {
-                for (ItemStack stack : blockInventory.getContents()) {
+                ItemStack[] itemStacks = null;
+
+                if (allowPersistentItems && signData.persistent) {
+                    try {
+                        itemStacks = plugin.getDatabase().getPersistentItems(blockInventory.getLocation()).toArray(new ItemStack[0]);
+                    } catch (SQLException exception) {
+                        // ignore
+                    }
+                } else {
+                    itemStacks = blockInventory.getContents();
+                }
+
+                if (itemStacks == null) {
+                    continue;
+                }
+
+                for (ItemStack stack : itemStacks) {
                     if (stack == null) {
                         continue;
                     }
@@ -242,6 +259,44 @@ public class InventoryHelper {
         }
 
         return connectedInventories;
+    }
+
+    SignData getSignDataFromConnectedInventories(Inventory inventory) {
+        List<Inventory> connectedInventories = getConnectedInventories(inventory);
+        if (connectedInventories == null) {
+            return null;
+        }
+
+        for (Inventory connectedInventory : connectedInventories) {
+            SignData signData = SignHelper.getSignDataForInventory(connectedInventory);
+            if (signData == null) {
+                continue;
+            }
+
+            return signData;
+        }
+
+        return null;
+    }
+
+    SignData getSignDataFromAllInventories(Inventory inventory) {
+        SignData signData;
+
+        // Get sign data from directly attached sign
+        signData = SignHelper.getSignDataForInventory(inventory);
+        if (signData != null) {
+            return signData;
+        }
+
+        // Get sign data from connected inventories
+        if (allowMultiChests) {
+            signData = getSignDataFromConnectedInventories(inventory);
+            if (signData != null && signData.multiChests) {
+                return signData;
+            }
+        }
+
+        return null;
     }
 
     void updateInventoryForSource(SignData signData, Inventory inventory) {
