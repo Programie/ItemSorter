@@ -4,18 +4,15 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 class Database {
     private final JavaPlugin plugin;
     private final Connection connection;
+    private final int version;
 
     Database(JavaPlugin plugin) throws Exception {
         Class.forName("org.sqlite.JDBC");
@@ -27,21 +24,52 @@ class Database {
         }
 
         connection = DriverManager.getConnection("jdbc:sqlite:" + new File(dataFolder, "database.db").getAbsolutePath());
+        version = getVersion();
         this.plugin = plugin;
 
         initTable();
     }
 
     private void initTable() throws Exception {
-        InputStream inputStream = plugin.getResource("database.sql");
-        if (inputStream == null) {
+        int migration = 0;
+
+        executeMigration(++migration, "Create links table", "CREATE TABLE IF NOT EXISTS `links`\n" +
+                "(\n" +
+                "    `id`     INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,\n" +
+                "    `uuid`   TEXT,\n" +
+                "    `player` TEXT COLLATE NOCASE,\n" +
+                "    `name`   TEXT COLLATE NOCASE,\n" +
+                "    `type`   TEXT COLLATE NOCASE,\n" +
+                "    `order`  INTEGER,\n" +
+                "    `world`  TEXT,\n" +
+                "    `x`      INTEGER,\n" +
+                "    `y`      INTEGER,\n" +
+                "    `z`      INTEGER\n" +
+                ")");
+
+        executeMigration(++migration, "Create location index for links table", "CREATE UNIQUE INDEX `location` ON `links` (`world`, `x`, `y`, `z`)");
+        executeMigration(++migration, "Create uuid index for links table", "CREATE INDEX `uuid` ON `links` (`uuid`)");
+        executeMigration(++migration, "Create nameType index for links table", "CREATE INDEX `nameType` ON `links` (`name`, `type`)");
+        executeMigration(++migration, "Create order index for links table", "CREATE INDEX `order` ON `links` (`order`)");
+    }
+
+    private int getVersion() throws SQLException {
+        Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery("PRAGMA `user_version`");
+
+        return resultSet.next() ? resultSet.getInt(1) : 0;
+    }
+
+    private void executeMigration(int version, String title, String statementString) throws SQLException {
+        if (this.version >= version) {
             return;
         }
 
-        String statementString = new BufferedReader(new InputStreamReader(inputStream)).lines().collect(Collectors.joining("\n"));
+        plugin.getLogger().info("Updating database to version " + version + ": " + title);
 
         Statement statement = connection.createStatement();
         statement.execute(statementString);
+        statement.execute("PRAGMA `user_version` = " + version);
     }
 
     void close() throws SQLException {
