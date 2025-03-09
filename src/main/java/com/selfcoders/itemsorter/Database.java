@@ -13,6 +13,7 @@ class Database {
     private final JavaPlugin plugin;
     private final Connection connection;
     private final int version;
+    private int migrationVersion = 0;
 
     Database(JavaPlugin plugin) throws Exception {
         Class.forName("org.sqlite.JDBC");
@@ -31,9 +32,7 @@ class Database {
     }
 
     private void initTable() throws Exception {
-        int migration = 0;
-
-        executeMigration(++migration, "Create links table", "CREATE TABLE IF NOT EXISTS `links`\n" +
+        executeMigration("Create links table", "CREATE TABLE IF NOT EXISTS `links`\n" +
                 "(\n" +
                 "    `id`     INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,\n" +
                 "    `uuid`   TEXT,\n" +
@@ -47,10 +46,10 @@ class Database {
                 "    `z`      INTEGER\n" +
                 ")");
 
-        executeMigration(++migration, "Create location index for links table", "CREATE UNIQUE INDEX `location` ON `links` (`world`, `x`, `y`, `z`)");
-        executeMigration(++migration, "Create uuid index for links table", "CREATE INDEX `uuid` ON `links` (`uuid`)");
-        executeMigration(++migration, "Create nameType index for links table", "CREATE INDEX `nameType` ON `links` (`name`, `type`)");
-        executeMigration(++migration, "Create order index for links table", "CREATE INDEX `order` ON `links` (`order`)");
+        executeMigration("Create location index for links table", "CREATE UNIQUE INDEX `location` ON `links` (`world`, `x`, `y`, `z`)");
+        executeMigration("Create uuid index for links table", "CREATE INDEX `uuid` ON `links` (`uuid`)");
+        executeMigration("Create nameType index for links table", "CREATE INDEX `nameType` ON `links` (`name`, `type`)");
+        executeMigration("Create order index for links table", "CREATE INDEX `order` ON `links` (`order`)");
     }
 
     private int getVersion() throws SQLException {
@@ -60,16 +59,18 @@ class Database {
         return resultSet.next() ? resultSet.getInt(1) : 0;
     }
 
-    private void executeMigration(int version, String title, String statementString) throws SQLException {
-        if (this.version >= version) {
+    private void executeMigration(String title, String statementString) throws SQLException {
+        int updateToVersion = ++migrationVersion;
+
+        if (version >= updateToVersion) {
             return;
         }
 
-        plugin.getLogger().info("Updating database to version " + version + ": " + title);
+        plugin.getLogger().info("Updating database to version " + updateToVersion + ": " + title);
 
         Statement statement = connection.createStatement();
         statement.execute(statementString);
-        statement.execute("PRAGMA `user_version` = " + version);
+        statement.execute("PRAGMA `user_version` = " + updateToVersion);
     }
 
     void close() throws SQLException {
