@@ -25,6 +25,7 @@ The following options can be configured in the config.yml of the plugin (created
 * `max-signs-per-name` - The maximum number of signs per name (`0` = unlimited, default: `0`)
 * `allow-multi-chests` - Allow multiple chests connected to a single target sign (default: `true`)
 * `max-multi-chests-blocks` - The maximum number of chest blocks used for the multi chest feature (`0` = unlimited, default: `0`)
+* `transfer-single-item-per-interval` - Controls whether only a single item (true) or the whole stack (false) is transferred per interval (default: `true`)
 * `transfer-interval` - Interval (in ticks) at which items are checked and transferred (default: `10`)
 
 ## Permissions

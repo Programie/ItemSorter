@@ -16,5 +16,8 @@ allow-multi-chests: true
 # The maximum number of chest blocks used for the multi chest feature (0 = unlimited)
 max-multi-chests-blocks: 0
 
+# Whether to only transfer a single item (true) or the whole stack (false) per interval
+transfer-single-item-per-interval: true
+
 # Interval (in ticks) at which items are checked and transferred
 transfer-interval: 10

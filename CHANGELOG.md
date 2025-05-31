@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.5] - 2025-05-31
+
+* Allow to configure to also transfer whole stacks instead of one item per interval
+
 ## [1.4] - 2023-08-20
 
 * Prevent editing sign with right click implemented with Minecraft 1.20

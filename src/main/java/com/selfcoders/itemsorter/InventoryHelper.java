@@ -17,13 +17,15 @@ public class InventoryHelper {
     private final int maxDistance;
     private final boolean allowMultiChests;
     private final int maxMultiChestsBlocks;
+    private final boolean transferSingleItemPerInterval;
 
-    InventoryHelper(ItemSorter plugin, boolean allowCrossWorldConnections, int maxDistance, boolean allowMultiChests, int maxMultiChestsBlocks) {
+    InventoryHelper(ItemSorter plugin, boolean allowCrossWorldConnections, int maxDistance, boolean allowMultiChests, int maxMultiChestsBlocks, boolean transferSingleItemPerInterval) {
         this.plugin = plugin;
         this.allowCrossWorldConnections = allowCrossWorldConnections;
         this.maxDistance = maxDistance;
         this.allowMultiChests = allowMultiChests;
         this.maxMultiChestsBlocks = maxMultiChestsBlocks;
+        this.transferSingleItemPerInterval = transferSingleItemPerInterval;
     }
 
     List<Inventory> getInventories(List<Location> locations) {
@@ -132,8 +134,11 @@ public class InventoryHelper {
     boolean moveItemToInventories(ItemStack itemStack, Inventory sourceInventory, List<Inventory> targetInventories) {
         ItemStack addStack = itemStack.clone();
 
-        // Only move a single item at once
-        addStack.setAmount(1);
+        // Only transfer a single item if true
+        // Otherwise, transfer the whole stack
+        if (this.transferSingleItemPerInterval) {
+            addStack.setAmount(1);
+        }
 
         // Clone item stack as it might be modified by Inventory.addItem()
         ItemStack removeStack = addStack.clone();
