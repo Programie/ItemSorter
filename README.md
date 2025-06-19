@@ -32,6 +32,7 @@ The following options can be configured in the config.yml of the plugin (created
 
 * `itemsorter.create` - Allow to create and destroy your own ItemSorter signs' (Default: everyone)
 * `itemsorter.destroyAny` - Allow to destroy any ItemSorter signs (not just your own) (Default: op)
+* `itemsorter.command` - Allow to execute the `/itemsorter` command (Default: op)
 * `itemsorter.*` - Allow access to all features (Default: op)
 
 ## How to use it?
@@ -114,6 +115,14 @@ All of those eight chests are connected using the same name `some name`, just li
 ### Show info about sign
 
 Clicking on a ItemSorter sign (left or right click) shows some information about the sign as well as it's connection to the other signs/chests.
+
+## Commands
+
+The plugin has a single command `/itemsorter` with multiple subcommands (actions).
+
+Available actions:
+
+* `remove-signs <player name> <sign name>`: Remove all signs with the specified name of the specified player
 
 ## Build
 
