@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.6] - 2025-06-19
+
+* Added command `/itemsorter remove-signs <player name> <sign name>` to remove all signs with the specified name of the specified player (only allowed for ops by default)
+* Fixed: Signs are removed by explosions but not removed from the database
+
 ## [1.5] - 2025-05-31
 
 * Allow to configure to also transfer whole stacks instead of one item per interval
