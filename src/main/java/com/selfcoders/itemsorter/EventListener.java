@@ -8,8 +8,8 @@ import org.bukkit.block.data.type.WallSign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.block.*;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
@@ -260,6 +260,47 @@ public class EventListener implements Listener {
             player.sendMessage(ChatColor.GREEN + "You own " + totalLocations + " other chests with the same name.");
         } catch (SQLException exception) {
             plugin.getLogger().severe("Unable to get locations from database: " + exception.getMessage());
+        }
+    }
+
+    @EventHandler
+    public void onEntityExplode(EntityExplodeEvent event) {
+        Material blockType;
+        Sign signBlock;
+
+        for (Block block : event.blockList()) {
+            blockType = block.getType();
+
+            if (Tag.SIGNS.isTagged(blockType)) {
+                // Is a sign
+                signBlock = SignHelper.getSignFromBlock(block);
+            } else {
+                // Is a block which might has a sign attached to it
+                signBlock = SignHelper.getSignAttachedToBlock(block);
+            }
+
+            if (signBlock == null) {
+                continue;
+            }
+
+            SignData signData = new SignData(signBlock.getLines());
+
+            String type;
+            if (signData.isSource()) {
+                type = SignHelper.TYPE_SOURCE;
+            } else if (signData.isTarget()) {
+                type = SignHelper.TYPE_TARGET;
+            } else {
+                return;
+            }
+
+            try {
+                plugin.getDatabase().removeLocation(signData.player, signData.name, type, signBlock.getLocation());
+            } catch (SQLException exception) {
+                plugin.getLogger().severe("Unable to remove location from database: " + exception.getMessage());
+            }
+
+            plugin.removeSignLocation(signBlock.getLocation());
         }
     }
 
