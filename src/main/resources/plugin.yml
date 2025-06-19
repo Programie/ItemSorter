@@ -13,15 +13,16 @@ commands:
 permissions:
   itemsorter.*:
     children:
+      - itemsorter.command
       - itemsorter.create
       - itemsorter.destroyAny
+    default: op
+  itemsorter.command:
+    description: 'Allow to execute the /itemsorter command'
     default: op
   itemsorter.create:
     description: 'Allow to create and destroy your own ItemSorter signs'
     default: true
   itemsorter.destroyAny:
     description: 'Allow to destroy any ItemSorter signs (not just your own)'
-    default: op
-  itemsorter.command:
-    description: 'Allow to execute the /itemsorter command'
     default: op
