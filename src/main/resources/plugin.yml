@@ -5,6 +5,11 @@ author: Programie
 website: ${project.url}
 api-version: 1.20
 main: com.selfcoders.itemsorter.ItemSorter
+commands:
+  itemsorter:
+    description: 'Command for various ItemSorter actions'
+    permission: itemsorter.command
+    usage: 'Execute /itemsorter to list available actions'
 permissions:
   itemsorter.*:
     children:
@@ -16,4 +21,7 @@ permissions:
     default: true
   itemsorter.destroyAny:
     description: 'Allow to destroy any ItemSorter signs (not just your own)'
+    default: op
+  itemsorter.command:
+    description: 'Allow to execute the /itemsorter command'
     default: op

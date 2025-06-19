@@ -1,6 +1,8 @@
 package com.selfcoders.itemsorter;
 
 import org.bukkit.Location;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -72,6 +74,18 @@ public class ItemSorter extends JavaPlugin {
         } catch (Exception exception) {
             getLogger().severe("Error while closing the database: " + exception.getMessage());
         }
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (!command.getName().equalsIgnoreCase("itemsorter")) {
+            return false;
+        }
+
+        CommandHandler commandHandler = new CommandHandler(this, sender, args);
+        commandHandler.execute();
+
+        return true;
     }
 
     Database getDatabase() {

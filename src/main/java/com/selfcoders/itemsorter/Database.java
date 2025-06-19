@@ -107,6 +107,15 @@ class Database {
         statement.executeUpdate();
     }
 
+    void removeSigns(String player, String name) throws SQLException {
+        PreparedStatement statement = connection.prepareStatement("DELETE FROM `links` WHERE `player` = ? AND `name` = ?");
+
+        statement.setString(1, player);
+        statement.setString(2, name);
+
+        statement.executeUpdate();
+    }
+
     List<String> getNames(Player player) throws SQLException {
         PreparedStatement statement = connection.prepareStatement("SELECT `name` FROM `links` WHERE `uuid` = ? GROUP BY `name`");
 
@@ -147,6 +156,15 @@ class Database {
         PreparedStatement statement = connection.prepareStatement("SELECT `world`, `x`, `y`, `z` FROM `links` WHERE `uuid` = ? AND `name` = ? ORDER BY `order`");
 
         statement.setString(1, player.getUniqueId().toString());
+        statement.setString(2, name);
+
+        return getLocations(statement);
+    }
+
+    List<Location> getLocations(String player, String name) throws SQLException {
+        PreparedStatement statement = connection.prepareStatement("SELECT `world`, `x`, `y`, `z` FROM `links` WHERE `player` = ? AND `name` = ? ORDER BY `order`");
+
+        statement.setString(1, player);
         statement.setString(2, name);
 
         return getLocations(statement);
