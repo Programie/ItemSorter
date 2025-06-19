@@ -53,6 +53,7 @@ public class CommandHandler {
 
             for (Location location : locations) {
                 location.getBlock().breakNaturally();
+                plugin.removeSignLocation(location);
             }
 
             plugin.getDatabase().removeSigns(player, name);
