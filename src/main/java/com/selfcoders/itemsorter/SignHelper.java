@@ -142,6 +142,10 @@ public class SignHelper {
     }
 
     static boolean checkSign(Sign sign) {
+        if (sign == null) {
+            return false;
+        }
+
         String tagLine = ChatColor.stripColor(sign.getLine(0));
 
         return tagLine.equalsIgnoreCase(TAG_SOURCE) || tagLine.equalsIgnoreCase(TAG_TARGET);
