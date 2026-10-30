@@ -1,6 +1,7 @@
 package com.selfcoders.itemsorter;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -9,6 +10,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -86,6 +89,32 @@ public class ItemSorter extends JavaPlugin {
         commandHandler.execute();
 
         return true;
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        List<String> completions = new ArrayList<>();
+
+        if (args.length == 1) {
+            completions.add("help");
+            completions.add("persistent");
+            if (sender.hasPermission("itemsorter.command")) {
+                completions.add("remove-signs");
+            }
+        } else if (args.length == 2 && args[0].equalsIgnoreCase("persistent")) {
+            completions.addAll(Arrays.asList("list", "add", "remove", "clear"));
+        } else if (args.length == 3 && args[0].equalsIgnoreCase("persistent") && (args[1].equalsIgnoreCase("add") || args[1].equalsIgnoreCase("remove"))) {
+            for (Material material : Material.values()) {
+                if (material.isItem() && !material.isLegacy()) {
+                    completions.add(material.name().toLowerCase());
+                }
+            }
+        }
+
+        String prefix = args[args.length - 1].toLowerCase();
+        completions.removeIf(completion -> !completion.startsWith(prefix));
+
+        return completions;
     }
 
     Database getDatabase() {

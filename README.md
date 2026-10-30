@@ -31,6 +31,7 @@ The following options can be configured in the config.yml of the plugin (created
 ## Permissions
 
 * `itemsorter.create` - Allow to create and destroy your own ItemSorter signs' (Default: everyone)
+* `itemsorter.persistent` - Allow to manage the persistent items of your own target signs (Default: everyone)
 * `itemsorter.destroyAny` - Allow to destroy any ItemSorter signs (not just your own) (Default: op)
 * `itemsorter.command` - Allow to execute the `/itemsorter` command (Default: op)
 * `itemsorter.*` - Allow access to all features (Default: op)
@@ -56,6 +57,23 @@ Next, place any item you would like to sort into the target chest. For example, 
 After that, you are ready to go. Now you may move any item from your player inventory into the source chest and the plugin will try to find the correct target chest for each item.
 
 Any remaining items which can't be sorted into a target chest will remain in the source chest.
+
+### Persistent items
+
+Normally, a target chest only accepts item types which are currently inside of it. Once the chest gets emptied (i.e. by a hopper below it), it no longer knows which items it should receive.
+
+Add `p` (short for "Persistent") to the fourth line of a target sign to make the chest remember the item types it has contained. Remembered item types are stored in the database and are still accepted when the chest is empty. Right-click the sign to see the remembered item types.
+
+* Fourth line: `p` (can be combined with other options, e.g. `o:10,mc,p`)
+
+Item types are remembered whenever a player closes the chest (and once when the sign is placed). They are never forgotten automatically, not even when the last item is taken out. Items moved by hoppers do not change the list. Only the item type is compared, not damage or other item data.
+
+To manage the list manually, look at the target sign and use the following commands (only for your own signs unless you have `itemsorter.destroyAny`):
+
+* `/itemsorter persistent list` - List the remembered item types
+* `/itemsorter persistent add <material>` - Add an item type
+* `/itemsorter persistent remove <material>` - Remove an item type
+* `/itemsorter persistent clear` - Remove all item types
 
 I've also created a [short video](https://www.youtube.com/watch?v=1KBjjMT5_-0) demonstrating the plugin.
 

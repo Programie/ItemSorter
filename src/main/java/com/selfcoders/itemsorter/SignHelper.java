@@ -5,6 +5,7 @@ import com.selfcoders.bukkitlibrary.SignUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.block.*;
+import org.bukkit.block.sign.Side;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 
@@ -115,6 +116,37 @@ public class SignHelper {
         return new SignData(sign);
     }
 
+    /**
+     * Get the ItemSorter sign attached to the container of the given inventory (also handles double chests).
+     *
+     * @param inventory the inventory
+     * @return Sign or null
+     */
+    static Sign getSignForInventory(Inventory inventory) {
+        InventoryHolder inventoryHolder = inventory.getHolder();
+
+        if (inventoryHolder instanceof Container) {
+            return getSignAttachedToBlock(((Container) inventoryHolder).getBlock());
+        }
+
+        if (inventoryHolder instanceof DoubleChest) {
+            InventoryHolder leftSide = ((DoubleChest) inventoryHolder).getLeftSide();
+            if (leftSide instanceof Container) {
+                Sign sign = getSignAttachedToBlock(((Container) leftSide).getBlock());
+                if (sign != null) {
+                    return sign;
+                }
+            }
+
+            InventoryHolder rightSide = ((DoubleChest) inventoryHolder).getRightSide();
+            if (rightSide instanceof Container) {
+                return getSignAttachedToBlock(((Container) rightSide).getBlock());
+            }
+        }
+
+        return null;
+    }
+
     static SignData getSignDataForInventory(Inventory inventory) {
         InventoryHolder inventoryHolder = inventory.getHolder();
 
@@ -146,7 +178,7 @@ public class SignHelper {
             return false;
         }
 
-        String tagLine = ChatColor.stripColor(sign.getLine(0));
+        String tagLine = ChatColor.stripColor(sign.getSide(Side.FRONT).getLine(0));
 
         return tagLine.equalsIgnoreCase(TAG_SOURCE) || tagLine.equalsIgnoreCase(TAG_TARGET);
     }
