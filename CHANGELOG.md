@@ -1,12 +1,13 @@
 # Changelog
 
-## [Unreleased]
+## [1.7] - 2026-10-31
 
-* Added `p` option for target signs to remember item types persistently (even when the chest is empty)
-* Added command `/itemsorter persistent <list|add|remove|clear>` to manage the persistent items (new permission `itemsorter.persistent`, default: everyone)
-* Right-clicking a target sign with the `p` option lists the persistent items
-* The `/itemsorter` command no longer requires `itemsorter.command` in general, only the `remove-signs` action does
-* Use the non-deprecated sign side API
+* Persistent items in target chest (Thanks to @MajorMaxdom)
+  * Added `p` option for target signs to remember item types persistently (even when the chest is empty)
+  * Added command `/itemsorter persistent <list|add|remove|clear>` to manage the persistent items (new permission `itemsorter.persistent`, default: everyone)
+  * Right-clicking a target sign with the `p` option lists the persistent items
+  * The `/itemsorter` command no longer requires `itemsorter.command` in general, only the `remove-signs` action does
+* Use the non-deprecated sign side API (Thanks to @MajorMaxdom)
 
 ## [1.6] - 2025-06-19
 
