@@ -14,10 +14,16 @@ import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class EventListener implements Listener {
     private final ItemSorter plugin;
@@ -194,6 +200,9 @@ public class EventListener implements Listener {
         }
 
         Container containerBlock = (Container) attachedToBlockState;
+        if (signData.isTarget() && signData.persistent) {
+            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> updatePersistentItems(containerBlock.getInventory()), 1L);
+        }
         Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> inventoryHelper.updateInventory(containerBlock.getInventory()), 1L);
     }
 
@@ -222,7 +231,7 @@ public class EventListener implements Listener {
             return;
         }
 
-        SignData signData = new SignData(signBlock.getLines());
+        SignData signData = new SignData(signBlock);
 
         if (!player.hasPermission("itemsorter.destroyAny")) {
             Player signOwner = plugin.getServer().getPlayer(signData.player);
@@ -283,7 +292,7 @@ public class EventListener implements Listener {
                 continue;
             }
 
-            SignData signData = new SignData(signBlock.getLines());
+            SignData signData = new SignData(signBlock);
 
             String type;
             if (signData.isSource()) {
@@ -321,7 +330,7 @@ public class EventListener implements Listener {
             return;
         }
 
-        SignData signData = new SignData(signBlock.getLines());
+        SignData signData = new SignData(signBlock);
         if (!signData.isItemSorterSign()) {
             return;
         }
@@ -356,6 +365,24 @@ public class EventListener implements Listener {
             }
         }
 
+        if (signData.isTarget() && signData.persistent) {
+            try {
+                List<String> materialNames = new ArrayList<>();
+                for (Material material : plugin.getDatabase().getPersistentMaterials(signLocation)) {
+                    materialNames.add(material.name().toLowerCase());
+                }
+                Collections.sort(materialNames);
+
+                if (materialNames.isEmpty()) {
+                    messages.add("No persistent items stored yet");
+                } else {
+                    messages.add("Persistent items (" + ChatColor.YELLOW + materialNames.size() + ChatColor.RESET + "): " + ChatColor.YELLOW + String.join(ChatColor.RESET + ", " + ChatColor.YELLOW, materialNames));
+                }
+            } catch (SQLException exception) {
+                plugin.getLogger().severe("Unable to get persistent items from database: " + exception.getMessage());
+            }
+        }
+
         event.getPlayer().sendMessage(messages.toArray(new String[0]));
     }
 
@@ -379,7 +406,11 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void onInventoryCloseEvent(InventoryCloseEvent event) {
-        inventoryHelper.updateInventory(event.getInventory());
+        Inventory inventory = event.getInventory();
+
+        updatePersistentItems(inventory);
+
+        inventoryHelper.updateInventory(inventory);
     }
 
     @EventHandler
@@ -400,6 +431,47 @@ public class EventListener implements Listener {
         Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> inventoryHelper.updateInventory(event.getInventory()), 1L);
     }
 
+
+    private static Set<Material> getMaterials(Inventory inventory) {
+        Set<Material> materials = new HashSet<>();
+
+        for (ItemStack stack : inventory.getContents()) {
+            if (stack != null && !stack.getType().isAir()) {
+                materials.add(stack.getType());
+            }
+        }
+
+        return materials;
+    }
+
+    /**
+     * Add the item types currently inside the chest to the persistent item types of its target sign.
+     * Item types are never removed automatically, so taking out the last item does not make the chest forget it.
+     *
+     * @param inventory The inventory a player has used
+     */
+    void updatePersistentItems(Inventory inventory) {
+        Sign sign = SignHelper.getSignForInventory(inventory);
+        if (sign == null) {
+            return;
+        }
+
+        SignData signData = new SignData(sign);
+        if (!signData.isTarget() || !signData.persistent) {
+            return;
+        }
+
+        try {
+            Set<Material> current = getMaterials(inventory);
+            Set<Material> materials = plugin.getDatabase().getPersistentMaterials(sign.getLocation());
+
+            materials.addAll(current);
+
+            plugin.getDatabase().setPersistentMaterials(sign.getLocation(), materials);
+        } catch (SQLException exception) {
+            plugin.getLogger().severe("Unable to update persistent items in database: " + exception.getMessage());
+        }
+    }
 
     private void addMessageForLocations(List<String> messages, Location signLocation, List<Location> locations) {
         for (Location location : locations) {

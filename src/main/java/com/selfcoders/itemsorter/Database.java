@@ -1,13 +1,16 @@
 package com.selfcoders.itemsorter;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 class Database {
     private final JavaPlugin plugin;
@@ -50,6 +53,15 @@ class Database {
         executeMigration("Create uuid index for links table", "CREATE INDEX `uuid` ON `links` (`uuid`)");
         executeMigration("Create nameType index for links table", "CREATE INDEX `nameType` ON `links` (`name`, `type`)");
         executeMigration("Create order index for links table", "CREATE INDEX `order` ON `links` (`order`)");
+        executeMigration("Create persistent_items table", "CREATE TABLE IF NOT EXISTS `persistent_items`\n" +
+                "(\n" +
+                "    `world`    TEXT,\n" +
+                "    `x`        INTEGER,\n" +
+                "    `y`        INTEGER,\n" +
+                "    `z`        INTEGER,\n" +
+                "    `material` TEXT,\n" +
+                "    PRIMARY KEY (`world`, `x`, `y`, `z`, `material`)\n" +
+                ")");
     }
 
     private int getVersion() throws SQLException {
@@ -105,13 +117,71 @@ class Database {
         statement.setInt(7, (int) location.getZ());
 
         statement.executeUpdate();
+
+        removePersistentMaterials(location);
     }
 
     void removeSigns(String player, String name) throws SQLException {
+        PreparedStatement cleanup = connection.prepareStatement("DELETE FROM `persistent_items` WHERE EXISTS (SELECT 1 FROM `links` WHERE `links`.`player` = ? AND `links`.`name` = ? AND `links`.`world` = `persistent_items`.`world` AND `links`.`x` = `persistent_items`.`x` AND `links`.`y` = `persistent_items`.`y` AND `links`.`z` = `persistent_items`.`z`)");
+
+        cleanup.setString(1, player);
+        cleanup.setString(2, name);
+
+        cleanup.executeUpdate();
+
         PreparedStatement statement = connection.prepareStatement("DELETE FROM `links` WHERE `player` = ? AND `name` = ?");
 
         statement.setString(1, player);
         statement.setString(2, name);
+
+        statement.executeUpdate();
+    }
+
+    Set<Material> getPersistentMaterials(Location location) throws SQLException {
+        PreparedStatement statement = connection.prepareStatement("SELECT `material` FROM `persistent_items` WHERE `world` = ? AND `x` = ? AND `y` = ? AND `z` = ?");
+
+        statement.setString(1, location.getWorld().getName());
+        statement.setInt(2, location.getBlockX());
+        statement.setInt(3, location.getBlockY());
+        statement.setInt(4, location.getBlockZ());
+
+        Set<Material> materials = new HashSet<>();
+
+        ResultSet result = statement.executeQuery();
+
+        while (result.next()) {
+            Material material = Material.matchMaterial(result.getString("material"));
+            if (material != null) {
+                materials.add(material);
+            }
+        }
+
+        return materials;
+    }
+
+    void setPersistentMaterials(Location location, Set<Material> materials) throws SQLException {
+        removePersistentMaterials(location);
+
+        PreparedStatement statement = connection.prepareStatement("INSERT INTO `persistent_items` (`world`, `x`, `y`, `z`, `material`) VALUES (?, ?, ?, ?, ?)");
+
+        for (Material material : materials) {
+            statement.setString(1, location.getWorld().getName());
+            statement.setInt(2, location.getBlockX());
+            statement.setInt(3, location.getBlockY());
+            statement.setInt(4, location.getBlockZ());
+            statement.setString(5, material.name());
+
+            statement.executeUpdate();
+        }
+    }
+
+    void removePersistentMaterials(Location location) throws SQLException {
+        PreparedStatement statement = connection.prepareStatement("DELETE FROM `persistent_items` WHERE `world` = ? AND `x` = ? AND `y` = ? AND `z` = ?");
+
+        statement.setString(1, location.getWorld().getName());
+        statement.setInt(2, location.getBlockX());
+        statement.setInt(3, location.getBlockY());
+        statement.setInt(4, location.getBlockZ());
 
         statement.executeUpdate();
     }

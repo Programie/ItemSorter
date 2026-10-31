@@ -2,6 +2,7 @@ package com.selfcoders.itemsorter;
 
 import org.bukkit.ChatColor;
 import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
 
 public class SignData {
     String tagLine;
@@ -9,6 +10,7 @@ public class SignData {
     String player;
     Integer order = 0;
     Boolean multiChests = false;
+    Boolean persistent = false;
 
     SignData(String[] lines) {
         if (lines.length >= 1) {
@@ -44,13 +46,16 @@ public class SignData {
                     case "mc":// Multi chests
                         multiChests = true;
                         break;
+                    case "p":// Persistent items
+                        persistent = true;
+                        break;
                 }
             }
         }
     }
 
     SignData(Sign sign) {
-        this(sign.getLines());
+        this(sign.getSide(Side.FRONT).getLines());
     }
 
     boolean isItemSorterSign() {

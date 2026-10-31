@@ -77,13 +77,34 @@ public class InventoryHelper {
                 }
             }
 
+            SignData targetSignData = new SignData(sign);
+            if (targetSignData.persistent) {
+                try {
+                    Set<Material> persistentMaterials = plugin.getDatabase().getPersistentMaterials(signLocation);
+
+                    for (Inventory blockInventory : blockInventories) {
+                        for (Material material : persistentMaterials) {
+                            List<Inventory> list = inventories.computeIfAbsent(material, key -> new ArrayList<>());
+                            if (!list.contains(blockInventory)) {
+                                list.add(blockInventory);
+                            }
+                        }
+                    }
+                } catch (SQLException exception) {
+                    plugin.getLogger().severe("Unable to get persistent items from database: " + exception.getMessage());
+                }
+            }
+
             for (Inventory blockInventory : blockInventories) {
                 for (ItemStack stack : blockInventory.getContents()) {
                     if (stack == null) {
                         continue;
                     }
 
-                    inventories.computeIfAbsent(stack.getType(), key -> new ArrayList<>()).add(blockInventory);
+                    List<Inventory> list = inventories.computeIfAbsent(stack.getType(), key -> new ArrayList<>());
+                    if (!list.contains(blockInventory)) {
+                        list.add(blockInventory);
+                    }
                 }
             }
         }
