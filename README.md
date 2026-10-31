@@ -58,6 +58,8 @@ After that, you are ready to go. Now you may move any item from your player inve
 
 Any remaining items which can't be sorted into a target chest will remain in the source chest.
 
+I've also created a [short video](https://www.youtube.com/watch?v=1KBjjMT5_-0) demonstrating the plugin.
+
 ### Persistent items
 
 Normally, a target chest only accepts item types which are currently inside of it. Once the chest gets emptied (i.e. by a hopper below it), it no longer knows which items it should receive.
@@ -74,8 +76,6 @@ To manage the list manually, look at the target sign and use the following comma
 * `/itemsorter persistent add <material>` - Add an item type
 * `/itemsorter persistent remove <material>` - Remove an item type
 * `/itemsorter persistent clear` - Remove all item types
-
-I've also created a [short video](https://www.youtube.com/watch?v=1KBjjMT5_-0) demonstrating the plugin.
 
 ### Target order
 
